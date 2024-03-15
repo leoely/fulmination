@@ -1,5 +1,5 @@
 {
-  "name": "@fulmination/color",
+  "name": "fulmination",
   "version": "0.0.1",
   "description": "Color text formate project.",
   "main": "dist/index.js",

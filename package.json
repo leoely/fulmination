@@ -2,7 +2,7 @@
   "name": "fulmination",
   "version": "0.0.1",
   "description": "Color text formate project.",
-  "main": "dist/index.js",
+  "main": "dist/class/Parser.js",
   "repository": "git@github.com:leoely/fulmination.git",
   "author": "Leo Ely",
   "license": "MIT",

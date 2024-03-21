@@ -219,6 +219,7 @@ class Parser {
       case 8: {
         if (char === '|') {
           this.passages.push(this.elems.join('').trim());
+          this.elems = [];
         } else if (char === 'EOF' || char === '(' || char === '[') {
           this.passages.push(this.elems.join('').trim());
           showPassages(this.passages, this.formates);

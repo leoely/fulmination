@@ -177,7 +177,7 @@ class Parser {
         break;
       }
       case 3: {
-        if (char === ',') {
+        if (char === ';') {
           const formate = this.elems.join('').trimStart();
           this.formates.push(formate);
           this.elems = [];
@@ -224,7 +224,7 @@ class Parser {
         break;
       }
       case 7: {
-        if (char === ',') {
+        if (char === ';') {
           const formate = this.elems.join('').trimStart();
           this.formates.push(formate);
           this.elems = [];

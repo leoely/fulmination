@@ -1,5 +1,7 @@
 import { stdout, } from 'process';
 import chalk from 'chalk';
+import parseCtf from '~/lib/util/parseCtf';
+import ctfTemplate from '~/lib/template/ctfTemplate';
 
 function getStyle(formates) {
   let style = chalk;
@@ -70,7 +72,7 @@ function getStyle(formates) {
       case 'bgWhite':
         style = style.bgWhite;
       default:
-        throw Error(`Formate ${formate} is invalid.`);
+        throw new Error(`Formate ${formate} is invalid.`);
         break;
     }
   }
@@ -89,37 +91,56 @@ function showPassages(passages, formates) {
   });
 }
 
+function showCtf(ctf, line) {
+  console.log([
+    chalk.gray(line),
+    chalk.bgWhite(parseCtf(ctf).map((t) => ctfTemplate(t)).join(''))
+  ].join(''));
+}
+
 class Parser {
   constructor() {
-    this.l = 0;
+    this.l = 1;
     this.p = 0;
     this.status = 0;
+  }
+
+  showErrorLocation(text) {
+    const lines = text.split('\n');
+    const { p, } = this;
+    console.log(showCtf(lines[p], p));
+    console.log(showCtf(lines[p + 1], p + 1));
   }
 
   scan(text) {
     for (let i = 0; i < text.length; i += 1) {
       const char = text.charAt(i);
-      switch (char) {
-        case ' ': {
-          const prevChar = text.charAt(i - 1);
-          if (prevChar === ' ' || prevChar === '|' || prevChar === '') {
-            this.p += 1;
-          } else {
-            this.dealEfficientChar(char);
+      try {
+        switch (char) {
+          case ' ': {
+            const prevChar = text.charAt(i - 1);
+            if (prevChar === ' ' || prevChar === '|' || prevChar === '') {
+              this.p += 1;
+            } else {
+              this.dealEfficientChar(char);
+            }
+            break;
           }
-          break;
+          case '\n':
+            this.p = 1;
+            this.line += 1;
+            break;
+          default:
+            this.p += 1;
+            this.dealEfficientChar(char);
+            break;
         }
-        case '\n':
-          this.p = 1;
-          this.line += 1;
-          break;
-        default:
-          this.p += 1;
-          this.dealEfficientChar(char);
-          break;
+        this.dealEfficientChar('EOF');
+      } catch (e) {
+        this.showErrorLocation(text);
+        console.log(e.stack);
       }
     }
-    this.dealEfficientChar('EOF');
   }
 
   dealEfficientChar(char) {
@@ -132,6 +153,8 @@ class Parser {
           case '[':
             this.status = 5;
             break;
+          default:
+            throw new Error(chalk.bold('ctf formate should start with "' + chalk.green(')') + '" or "' + chalk.yellow('[') +'".'));
         }
         break;
       }
@@ -139,7 +162,7 @@ class Parser {
         if (char === '+') {
           this.status = 2;
         } else {
-          throw Error('This position should be "+".');
+          throw new Error('This position should be "+".');
         }
         break;
       }
@@ -149,7 +172,7 @@ class Parser {
           this.status = 3;
           this.formates = [];
         } else {
-          throw Error('This position should be ")".');
+          throw new Error('This position should be ")".');
         }
         break;
       }
@@ -186,7 +209,7 @@ class Parser {
         if (char === '+') {
           this.status = 6;
         } else {
-          throw Error('This position should be "+".');
+          throw new Error('This position should be "+".');
         }
         break;
       }
@@ -196,7 +219,7 @@ class Parser {
           this.status = 7;
           this.formates = [];
         } else {
-          throw Error('This position should be "]".');
+          throw new Error('This position should be "]".');
         }
         break;
       }

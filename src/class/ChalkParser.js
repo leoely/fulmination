@@ -12,6 +12,7 @@ class ChalkParser {
   }
 
   scan(text, style) {
+    this.status = 0;
     for (let i = 0; i < text.length; i += 1) {
       const char = text.charAt(i);
       if (char === ' ') {
@@ -111,14 +112,14 @@ class ChalkParser {
             this.status = 59;
             this.elems = [];
           } else {
-            throw new Error('Background color name error.');
+            throw new Error('color name error.');
           }
           break;
         case 6:
           if (char === 'd') {
             style = style.bgRed;
           } else {
-            throw new Error('Background color name error.');
+            throw new Error('color name error.');
           }
           break;
         case 7:
@@ -134,7 +135,7 @@ class ChalkParser {
           if (char === 'n') {
             style = style.bgGreen;
           } else {
-            throw new Error('Background color name error.');
+            throw new Error('color name error.');
           }
           break;
         case 11:
@@ -153,7 +154,7 @@ class ChalkParser {
           if (char === 'w') {
             style = style.bgYellow;
           } else {
-            throw new Error('Background color name error.');
+            throw new Error('color name error.');
           }
           break;
         case 16:
@@ -170,7 +171,7 @@ class ChalkParser {
           if (char === 'e') {
             style = style.bgBlue;
           } else {
-            throw new Error('Background color name error.');
+            throw new Error('Color name error.');
           }
           break;
         case 19:
@@ -192,7 +193,7 @@ class ChalkParser {
           if (char === 'a') {
             style = style.bgMegenta;
           } else {
-            throw new Error('Background color name error.');
+            throw new Error('Color name error.');
           }
           break;
         case 25:
@@ -205,7 +206,7 @@ class ChalkParser {
           if (char === 'n') {
             style = style.bgCyan;
           } else {
-            throw new Error('Background color name error.');
+            throw new Error('Color name error.');
           }
           break;
         case 28:
@@ -221,7 +222,7 @@ class ChalkParser {
           if (char === 'e') {
             style = style.bgWhite;
           } else {
-            throw new Error('Background color name error.');
+            throw new Error('Color name error.');
           }
           break;
         case 33:
@@ -231,7 +232,7 @@ class ChalkParser {
           if (char === 'k') {
             style = style.bgBlack;
           } else {
-            throw new Error('Background color name error.');
+            throw new Error('Color name error.');
           }
           break;
         case 35:
@@ -241,7 +242,7 @@ class ChalkParser {
           if (char === 'd') {
             style = style.bold;
           } else {
-            throw new Error('Background color name error.');
+            throw new Error('Color name error.');
           }
           break;
         case 37:
@@ -254,7 +255,7 @@ class ChalkParser {
           if (char === 'n') {
             style = style.cyan;
           } else {
-            throw new Error('Background color name error.');
+            throw new Error('Color name error.');
           }
           break;
         case 40:
@@ -267,7 +268,7 @@ class ChalkParser {
           if (char === 'y') {
             style = style.gray;
           } else {
-            throw new Error('Background color name error.');
+            throw new Error('Color name error.');
           }
           break;
         case 43:
@@ -276,7 +277,7 @@ class ChalkParser {
           } else if (char === 'n') {
             this.status = 48;
           } else {
-            throw new Error('Background color name error.');
+            throw new Error('Color name error.');
           }
           break;
         case 44:
@@ -474,6 +475,7 @@ class ChalkParser {
           break;
       }
     }
+    return style;
   }
 }
 

@@ -1,91 +1,12 @@
 import { stdout, } from 'process';
 import chalk from 'chalk';
-import parseCtf from '~/lib/util/parseCtf';
-import ctfTemplate from '~/lib/template/ctfTemplate';
+import parseChalk from '~/lib/util/parseChalk';
 
-function getStyle(formates) {
-  let style = chalk;
-  for (let i = 0; i < formates.length; i += 1) {
-    const formate = formates[i];
-    switch (formate) {
-      case 'bold':
-        style = style.bold;
-        break;
-      case 'dim':
-        style = style.dim;
-        break;
-      case 'italic':
-        style = style.italic;
-        break;
-      case 'underline':
-        style = style.underline;
-        break;
-      case 'inverse':
-        style = style.inverse;
-        break;
-      case 'strikethrough':
-        style = style.strikethrough;
-        break;
-      case 'red':
-        style = style.red;
-        break;
-      case 'green':
-        style = style.green;
-        break;
-      case 'yellow':
-        style = style.green;
-        break;
-      case 'blue':
-        style = style.blue;
-        break;
-      case 'magenta':
-        style = style.magenta;
-        break;
-      case 'cyan':
-        style = style.cyan;
-        break;
-      case 'white':
-        style = style.white;
-        break;
-      case 'gray':
-        style = style.gray;
-        break;
-      case 'bgBlack':
-        style = style.bgBlack;
-        break;
-      case 'bgRed':
-        style = style.bgRed;
-        break;
-      case 'bgGreen':
-        style = style.bgGreen;
-        break;
-      case 'bgYellow':
-        style = style.bgYellow;
-        break;
-      case 'bgBlue':
-        style = style.bgBlue;
-        break;
-      case 'bgMegenta':
-        style = style.bgMegenta;
-      case 'bgCyan':
-        style = style.bgCyan;
-      case 'bgWhite':
-        style = style.bgWhite;
-      default:
-        throw new Error(`Formate ${formate} is invalid.`);
-        break;
-    }
-  }
-  return style;
-}
-
-function showText(text, formates) {
-  const style = getStyle(formates);
+function showText(text, style) {
   process.stdout.write(style(text));
 }
 
-function showPassages(passages, formates) {
-  const style = getStyle(formates);
+function showPassages(passages, style) {
   passages.forEach((passage) => {
     console.log(style(passage));
   });
@@ -108,39 +29,34 @@ class Parser {
   showErrorLocation(text) {
     const lines = text.split('\n');
     const { p, } = this;
-    console.log(showCtf(lines[p], p));
-    console.log(showCtf(lines[p + 1], p + 1));
+    //console.log(showCtf(lines[p], p));
+    //console.log(showCtf(lines[p + 1], p + 1));
   }
 
   scan(text) {
     for (let i = 0; i < text.length; i += 1) {
       const char = text.charAt(i);
-      try {
-        switch (char) {
-          case ' ': {
-            const prevChar = text.charAt(i - 1);
-            if (prevChar === ' ' || prevChar === '|' || prevChar === '') {
-              this.p += 1;
-            } else {
-              this.dealEfficientChar(char);
-            }
-            break;
-          }
-          case '\n':
-            this.p = 1;
-            this.line += 1;
-            break;
-          default:
+      switch (char) {
+        case ' ': {
+          const prevChar = text.charAt(i - 1);
+          if (prevChar === ' ' || prevChar === '|' || prevChar === '') {
             this.p += 1;
+          } else {
             this.dealEfficientChar(char);
-            break;
+          }
+          break;
         }
-        this.dealEfficientChar('EOF');
-      } catch (e) {
-        this.showErrorLocation(text);
-        console.log(e.stack);
+        case '\n':
+          this.p = 1;
+          this.line += 1;
+          break;
+        default:
+          this.p += 1;
+          this.dealEfficientChar(char);
+          break;
       }
     }
+    this.dealEfficientChar('EOF');
   }
 
   dealEfficientChar(char) {
@@ -154,7 +70,7 @@ class Parser {
             this.status = 5;
             break;
           default:
-            throw new Error(chalk.bold('ctf formate should start with "' + chalk.green(')') + '" or "' + chalk.yellow('[') +'".'));
+            throw new Error(chalk.bold('ctf format should start with "' + chalk.green(')') + '" or "' + chalk.yellow('[') +'".'));
         }
         break;
       }
@@ -169,8 +85,8 @@ class Parser {
       case 2: {
         if (char === ')') {
           this.elems = [];
+          this.style = chalk;
           this.status = 3;
-          this.formates = [];
         } else {
           throw new Error('This position should be ")".');
         }
@@ -178,12 +94,12 @@ class Parser {
       }
       case 3: {
         if (char === ';') {
-          const formate = this.elems.join('').trimStart();
-          this.formates.push(formate);
+          const format = this.elems.join('').trimStart();
+          this.style = parseChalk(format, this.style);
           this.elems = [];
         } else if (char === ':') {
-          const formate = this.elems.join('').trimStart();
-          this.formates.push(formate);
+          const format = this.elems.join('').trimStart();
+          this.style = parseChalk(format, this.style);
           this.status = 4;
           this.elems = [];
         } else {
@@ -193,7 +109,7 @@ class Parser {
       }
       case 4: {
         if (char === 'EOF' || char === '(' || char === '[') {
-          showText(this.elems.join('').trim(), this.formates);
+          showText(this.elems.join('').trim(), this.style);
           if (char === '(') {
             this.status = 1;
           }
@@ -217,7 +133,7 @@ class Parser {
         if (char === ']') {
           this.elems = [];
           this.status = 7;
-          this.formates = [];
+          this.style = chalk;
         } else {
           throw new Error('This position should be "]".');
         }
@@ -225,12 +141,12 @@ class Parser {
       }
       case 7: {
         if (char === ';') {
-          const formate = this.elems.join('').trimStart();
-          this.formates.push(formate);
+          const format = this.elems.join('').trimStart();
+          this.style = parseChalk(format, this.style);
           this.elems = [];
         } else if (char === ':') {
-          const formate = this.elems.join('').trimStart();
-          this.formates.push(formate);
+          const format = this.elems.join('').trimStart();
+          this.style = parseChalk(format, this.style);
           this.status = 8;
           this.passages = [];
           this.elems = [];
@@ -245,7 +161,7 @@ class Parser {
           this.elems = [];
         } else if (char === 'EOF' || char === '(' || char === '[') {
           this.passages.push(this.elems.join('').trim());
-          showPassages(this.passages, this.formates);
+          showPassages(this.passages, this.style);
           if (char === '(') {
             this.status = 1;
           }

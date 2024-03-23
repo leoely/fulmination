@@ -39,7 +39,8 @@ class Parser {
       switch (char) {
         case ' ': {
           const prevChar = text.charAt(i - 1);
-          if (prevChar === ' ' || prevChar === '|' || prevChar === '') {
+          if (prevChar === ' ' || prevChar === '|' || prevChar === '' ||
+            prevChar === '\n') {
             this.p += 1;
           } else {
             this.dealEfficientChar(char);

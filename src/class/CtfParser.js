@@ -1,6 +1,8 @@
 import { stdout, } from 'process';
 import chalk from 'chalk';
 import parseChalk from '~/lib/util/parseChalk';
+import parseCtf from '~/lib/util/parseCtf';
+import ctfTemplate from '~/lib/template/ctfTemplate';
 
 function showText(text, style) {
   process.stdout.write(style(text));
@@ -12,11 +14,22 @@ function showPassages(passages, style) {
   });
 }
 
-function showCtf(ctf, line) {
-  console.log([
-    chalk.gray(line),
-    chalk.bgWhite(parseCtf(ctf).map((t) => ctfTemplate(t)).join(''))
-  ].join(''));
+function showErrorText(text, line) {
+  console.log(' ' + chalk.gray(line) + ' ' + chalk.black.bgWhite(text));
+}
+
+function showErrorPosition(p) {
+  const stringList = [];
+  for (let i = 0; i < p + 3; i += 1) {
+    stringList.push(' ');
+  }
+  stringList.push(chalk.bold('~' + chalk.red('^') + '~'));
+  console.log(stringList.join(''));
+}
+
+function showBesideText(text, line) {
+  const highLightText = parseCtf(text).map((e) => ctfTemplate(e)).join('');
+  console.log(' ' + chalk.gray(line) + ' ' + chalk.black.bgWhite(highLightText));
 }
 
 class Parser {
@@ -26,38 +39,48 @@ class Parser {
     this.status = 0;
   }
 
-  showErrorLocation(text) {
+  showErrorLocation(text, error) {
     const lines = text.split('\n');
-    const { p, } = this;
-    //console.log(showCtf(lines[p], p));
-    //console.log(showCtf(lines[p + 1], p + 1));
+    const { l, p, } = this;
+    showErrorText(lines[l], l);
+    showErrorPosition(p);
+    if (lines[l + 1] !== undefined) {
+      showBesideText(lines[l + 1], l + 1);
+    }
+    console.log('');
+    console.log(chalk.bold(error.message));
+    console.log(error.stack);
   }
 
   scan(text) {
-    for (let i = 0; i < text.length; i += 1) {
-      const char = text.charAt(i);
-      switch (char) {
-        case ' ': {
-          const prevChar = text.charAt(i - 1);
-          if (prevChar === ' ' || prevChar === '|' || prevChar === '' ||
-            prevChar === '\n') {
-            this.p += 1;
-          } else {
-            this.dealEfficientChar(char);
+    try {
+      for (let i = 0; i < text.length; i += 1) {
+        const char = text.charAt(i);
+        switch (char) {
+          case ' ': {
+            const prevChar = text.charAt(i - 1);
+            if (prevChar === ' ' || prevChar === '|' || prevChar === '' ||
+              prevChar === '\n') {
+              this.p += 1;
+            } else {
+              this.dealEfficientChar(char);
+            }
+            break;
           }
-          break;
+          case '\n':
+            this.p = 1;
+            this.line += 1;
+            break;
+          default:
+            this.p += 1;
+            this.dealEfficientChar(char);
+            break;
         }
-        case '\n':
-          this.p = 1;
-          this.line += 1;
-          break;
-        default:
-          this.p += 1;
-          this.dealEfficientChar(char);
-          break;
       }
+      this.dealEfficientChar('EOF');
+    } catch (e) {
+      this.showErrorLocation(text, e);
     }
-    this.dealEfficientChar('EOF');
   }
 
   dealEfficientChar(char) {
@@ -71,7 +94,7 @@ class Parser {
             this.status = 5;
             break;
           default:
-            throw new Error(chalk.bold('ctf format should start with "' + chalk.green(')') + '" or "' + chalk.yellow('[') +'".'));
+            throw new Error('Ctf format should start with "(" or "[".');
         }
         break;
       }
@@ -110,6 +133,9 @@ class Parser {
       }
       case 4: {
         if (char === 'EOF' || char === '(' || char === '[') {
+          if (char === '[' || char === 'EOF') {
+            this.elems.push('\n');
+          }
           showText(this.elems.join('').trim(), this.style);
           if (char === '(') {
             this.status = 1;

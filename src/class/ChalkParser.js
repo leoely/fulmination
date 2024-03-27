@@ -262,7 +262,13 @@ class ChalkParser {
           this.matchChar(char, 'r', 41);
           break;
         case 41:
-          this.matchChar(char, 'a', 42);
+          if (char === 'a') {
+            this.status = 42;
+          } else if (char === 'e') {
+            this.status = 88;
+          } else {
+            throw new Error('Color name error.');
+          }
           break;
         case 42:
           if (char === 'y') {
@@ -469,6 +475,16 @@ class ChalkParser {
         case 87:
           if (char === 'w') {
             style = style.yellow;
+          } else {
+            throw new Error('Background color name error.');
+          }
+          break;
+        case 88:
+          this.matchChar(char, 'e',89);
+          break;
+        case 89:
+          if (char === 'n') {
+            style = style.green;
           } else {
             throw new Error('Background color name error.');
           }

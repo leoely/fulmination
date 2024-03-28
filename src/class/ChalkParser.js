@@ -28,6 +28,9 @@ class ChalkParser {
             case 'c':
               this.status = 37;
               break;
+            case 'd':
+              this.status = 90;
+              break;
             case 'g':
               this.status = 40;
               break;
@@ -485,6 +488,16 @@ class ChalkParser {
         case 89:
           if (char === 'n') {
             style = style.green;
+          } else {
+            throw new Error('Background color name error.');
+          }
+          break;
+        case 90:
+          this.matchChar(char, 'i', 91);
+          break;
+        case 91:
+          if (char === 'm') {
+            style = style.dim;
           } else {
             throw new Error('Background color name error.');
           }

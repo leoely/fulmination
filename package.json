@@ -1,6 +1,6 @@
 {
   "name": "fulmination",
-  "version": "0.0.3",
+  "version": "0.0.11",
   "description": "Color text formate project.",
   "main": "dist/class/CtfParser.js",
   "repository": "git@github.com:leoely/fulmination.git",
@@ -11,6 +11,9 @@
     "build": "gulp build",
     "test": "jest",
     "run": "yarn run build && node dist/index.js"
+  },
+  "bin": {
+    "fulmination": "./dist/bin/fulmination.js"
   },
   "devDependencies": {
     "@babel/cli": "^7.20.7",
@@ -23,6 +26,7 @@
     "jest": "^29.6.1"
   },
   "dependencies": {
+    "chalk": "^2.4.2",
     "glow.js": "^0.0.6",
     "gulp": "^4.0.2"
   }

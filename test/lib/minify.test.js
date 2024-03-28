@@ -4,8 +4,7 @@ import minify from '~/lib/util/minify';
 describe('[lib] color text formate test case;', () => {
   test('minify color text formate text;', async () => {
     expect(minify(`
-      (+) dim: This is fulmination text style.
-      (+) bold: This is fulmination text end test.|
+      (+) dim: This is fulmination text style. (+) dim: This is fulmination text end test. |
 
       [+] red; bold:
         | This is text will be color as red and bold.

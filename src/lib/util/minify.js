@@ -9,7 +9,8 @@ export default function minify(str) {
         const { length, } = strings;
         const prevChar = str.charAt(i - 1);
         if (prevChar !== ' ' && prevChar !== '|' && prevChar !== ''
-          && prevChar !== '\n') {
+          && prevChar !== '\n' && prevChar !== ';' && prevChar !== ']'
+          && prevChar !== ')' && prevChar !== ':') {
           strings.push(char);
         }
         break;

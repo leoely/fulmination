@@ -135,8 +135,10 @@ class Parser {
         if (char === 'EOF' || char === '(' || char === '[' || char === '|') {
           if (char === '|') {
             this.elems.push('\n');
+            showText(this.elems.join('').trimStart(), this.style);
+          } else {
+            showText(this.elems.join('').trim(), this.style);
           }
-          showText(this.elems.join('').trimStart(), this.style);
           if (char === '|') {
             this.status = 0;
           }

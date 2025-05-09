@@ -189,10 +189,10 @@ class Parser {
       }
       case 8: {
         if (char === '|') {
-          this.passages.push(this.elems.join('').trim());
+          this.passages.push(this.elems.join('').trimEnd());
           this.elems = [];
         } else if (char === 'EOF' || char === '(' || char === '[') {
-          this.passages.push(this.elems.join('').trim());
+          this.passages.push(this.elems.join('').trimEnd());
           showPassages(this.passages, this.style);
           if (char === '(') {
             this.status = 1;
@@ -201,7 +201,11 @@ class Parser {
             this.status = 5;
           }
         } else {
-          this.elems.push(char);
+          if (char === '*') {
+            this.elems.push(' ');
+          } else {
+            this.elems.push(char);
+          }
         }
         break;
       }

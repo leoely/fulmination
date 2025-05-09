@@ -3,6 +3,8 @@ import CtfParser from '~/class/CtfParser';
 
 const ctfParser = new CtfParser();
 ctfParser.scan(`
-(+) bold; green: some demo text1 (+) bold; dim: some demo text2 |
-(+) green: some deom text3
+[+] bold:
+| **This is ctf passage syntax.
+| **Each passage will in different line.
+| **Each passage is start with delimiter.
 `);

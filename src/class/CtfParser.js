@@ -135,9 +135,9 @@ class Parser {
         if (char === 'EOF' || char === '(' || char === '[' || char === '&') {
           if (char === '&') {
             this.elems.push('\n');
-            showText(this.elems.join('').trimStart(), this.style);
+            showText(this.elems.join('').trimEnd(), this.style);
           } else {
-            showText(this.elems.join('').trim(), this.style);
+            showText(this.elems.join('').trimEnd(), this.style);
           }
           if (char === '&') {
             this.status = 0;
@@ -149,7 +149,13 @@ class Parser {
             this.status = 5;
           }
         } else {
-          this.elems.push(char);
+          if (char === '*') {
+            this.elems.push(' ');
+          } else {
+            if (char !== ' ') {
+              this.elems.push(char);
+            }
+          }
         }
         break;
       }
@@ -204,7 +210,9 @@ class Parser {
           if (char === '*') {
             this.elems.push(' ');
           } else {
-            this.elems.push(char);
+            if (char !== ' ') {
+              this.elems.push(char);
+            }
           }
         }
         break;

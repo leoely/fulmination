@@ -4,8 +4,12 @@ import parseChalk from '~/lib/util/parseChalk';
 import parseCtf from '~/lib/util/parseCtf';
 import ctfTemplate from '~/lib/template/ctfTemplate';
 
-function showText(text, style) {
-  process.stdout.write(style(text));
+function showText(text, style, linebreak) {
+  if (linebreak === true) {
+    console.log(style(text));
+  } else {
+    process.stdout.write(style(text));
+  }
 }
 
 function showPassages(passages, style) {
@@ -147,13 +151,10 @@ class Parser {
       case 4: {
         if (char === 'EOF' || char === '(' || char === '[' || char === '&') {
           if (char === '&') {
-            this.elems.push('\n');
-            showText(this.elems.join('').trimEnd(), this.style);
+            showText(this.elems.join('').trimEnd(), this.style, true);
+            this.elems =  [];
           } else {
             showText(this.elems.join('').trimEnd(), this.style);
-          }
-          if (char === '&') {
-            this.status = 0;
           }
           if (char === '(') {
             this.status = 1;

@@ -52,6 +52,19 @@ class Parser {
     console.log(error.stack);
   }
 
+  handleSpace() {
+    let ans = false;
+    const { elems, } = this;
+    for (let i = 0; i < elems.length; i += 1) {
+      const char = elems[i];
+      if (char !== ' ' || char !== '|' || char !== '*' || char !== ':') {
+        ans = true;
+        break;
+      }
+    }
+    return ans;
+  }
+
   scan(text) {
     try {
       for (let i = 0; i < text.length; i += 1) {
@@ -152,7 +165,11 @@ class Parser {
           if (char === '*') {
             this.elems.push(' ');
           } else {
-            if (char !== ' ') {
+            if (char === ' ') {
+              if (this.handleSpace()) {
+                this.elems.push(char);
+              }
+            } else {
               this.elems.push(char);
             }
           }
@@ -199,6 +216,7 @@ class Parser {
           this.elems = [];
         } else if (char === 'EOF' || char === '(' || char === '[') {
           this.passages.push(this.elems.join('').trimEnd());
+          this.passages.shift();
           showPassages(this.passages, this.style);
           if (char === '(') {
             this.status = 1;
@@ -210,7 +228,11 @@ class Parser {
           if (char === '*') {
             this.elems.push(' ');
           } else {
-            if (char !== ' ') {
+            if (char === ' ') {
+              if (this.handleSpace()) {
+                this.elems.push(char);
+              }
+            } else {
               this.elems.push(char);
             }
           }

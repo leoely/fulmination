@@ -3,5 +3,10 @@ import CtfParser from '~/class/CtfParser';
 
 const ctfParser = new CtfParser();
 ctfParser.scan(`
-  (+) bold: text1 (+) bold; green: text2 (+) red: text3 & (+) bold; red: text4
+(+) bold; green: some demo text1 (+) bold; dim: some demo text2 |
+(+) green: some deom text3
+`);
+ctfParser.scan(`
+(+) bold; green: some demo text1 (+) bold; dim: some demo text2 |
+(+) green: some deom text3
 `);

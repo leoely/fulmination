@@ -59,9 +59,9 @@ class Parser {
   handleSpace() {
     let ans = false;
     const { elems, } = this;
-    for (let i = 0; i < elems.length; i += 1) {
+    for (let i = elems.length - 1; i >= 0; i -= 1) {
       const char = elems[i];
-      if (char !== ' ' || char !== '|' || char !== '*' || char !== ':') {
+      if (char !== ' ' && char !== '|' && char !== '*' && char !== ':') {
         ans = true;
         break;
       }
@@ -156,6 +156,11 @@ class Parser {
           } else {
             showText(this.elems.join('').trimEnd(), this.style);
           }
+          if (char === 'EOF') {
+            delete this.elems;
+            this.status = 0;
+            break;
+          }
           if (char === '(') {
             this.status = 1;
           }
@@ -224,6 +229,12 @@ class Parser {
           }
           if (char === '['){
             this.status = 5;
+          }
+          if (char === 'EOF') {
+            delete this.elems;
+            delete this.passages;
+            this.status = 0;
+            break;
           }
         } else {
           if (char === '*') {

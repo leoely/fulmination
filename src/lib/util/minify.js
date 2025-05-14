@@ -10,7 +10,7 @@ export default function minify(str) {
         const prevChar = str.charAt(i - 1);
         if (prevChar !== ' ' && prevChar !== '|' && prevChar !== ''
           && prevChar !== '\n' && prevChar !== ';' && prevChar !== ']'
-          && prevChar !== ')' && prevChar !== ':') {
+          && prevChar !== ')' && prevChar !== ':' && prevChar !== '&') {
           strings.push(char);
         }
         break;
@@ -32,7 +32,7 @@ export default function minify(str) {
       case ' ': {
         const { length, } = strings;
         const nextChar = str.charAt(i + 1);
-        if (nextChar !== '|' && nextChar !== '(') {
+        if (nextChar !== '|' && nextChar !== '(' && nextChar !== '&') {
           strings.push(char);
         }
         break;

@@ -1,12 +1,11 @@
 import chalk from 'chalk';
-import CtfParser from '~/class/CtfParser';
+import Fulmination from '~/class/Fulmination';
 
-const ctfParser = new CtfParser();
-ctfParser.scan(`
-(+) bold; green: some demo text1 (+) bold; dim: some demo text2 |
-(+) green: some deom text3
-`);
-ctfParser.scan(`
-(+) bold; green: some demo text1 (+) bold; dim: some demo text2 |
-(+) green: some deom text3
+const fulmination = new Fulmination();
+fulmination.scan(`
+  (+) bold: bold, underline and so on is chalk style. (+) underline: You can get this section document in chalk. &
+  (+) bold: text and passage use same chalk style.
+  [+] bold:
+  | style use ";" as delimiter, passage use "|" as delimiter.
+  | Passage apply style to all passage.Text apply style only to one text.
 `);

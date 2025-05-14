@@ -4,27 +4,13 @@ import parseChalk from '~/lib/util/parseChalk';
 import parseCtf from '~/lib/util/parseCtf';
 import ctfTemplate from '~/lib/template/ctfTemplate';
 
-function showText(text, style, linebreak) {
-  if (linebreak === true) {
-    console.log(style(text));
-  } else {
-    process.stdout.write(style(text));
-  }
-}
-
-function showPassages(passages, style) {
-  passages.forEach((passage) => {
-    console.log(style(passage));
-  });
-}
-
 function showErrorText(text, line) {
   console.log(' ' + chalk.gray(line) + ' ' + chalk.black.bgWhite(text));
 }
 
-function showErrorPosition(p) {
+function showErrorPosition(position) {
   const stringList = [];
-  for (let i = 0; i < p + 3; i += 1) {
+  for (let i = 0; i < position + (3 - 1); i += 1) {
     stringList.push(' ');
   }
   stringList.push(chalk.bold('~' + chalk.red('^') + '~'));
@@ -36,20 +22,32 @@ function showBesideText(text, line) {
   console.log(' ' + chalk.gray(line) + ' ' + chalk.black.bgWhite(highLightText));
 }
 
-class Parser {
-  constructor() {
-    this.l = 1;
-    this.p = 0;
+class Fulmination {
+  constructor(options = {}) {
+    const defaultOptions =  {
+      debug: false,
+    };
+    this.options = Object.assign(defaultOptions, options);
+    this.line = 1;
+    this.position = 1;
     this.status = 0;
+    const {
+      options: {
+        debug,
+      },
+    } = this;
+    if (debug === true) {
+      this.results = [];
+    }
   }
 
   showErrorLocation(text, error) {
     const lines = text.split('\n');
-    const { l, p, } = this;
-    showErrorText(lines[l], l);
-    showErrorPosition(p);
-    if (lines[l + 1] !== undefined) {
-      showBesideText(lines[l + 1], l + 1);
+    const { line, position, } = this;
+    showErrorText(lines[line], line);
+    showErrorPosition(position);
+    if (lines[line + 1] !== undefined) {
+      showBesideText(lines[line + 1], line + 1);
     }
     console.log('');
     console.log(chalk.bold(error.message));
@@ -69,6 +67,49 @@ class Parser {
     return ans;
   }
 
+  showText(text, style, linebreak) {
+    if (linebreak === true) {
+      const {
+        options: {
+          debug,
+        },
+      } = this;
+      if (debug === true) {
+        this.results.push(style(text));
+        this.results.push('\n');
+      } else {
+        console.log(style(text));
+      }
+    } else {
+      const {
+        options: {
+          debug,
+        },
+      } = this;
+      if (debug === true) {
+        this.results.push(style(text));
+      } else {
+        process.stdout.write(style(text));
+      }
+    }
+  }
+
+  showPassages(passages, style) {
+    passages.forEach((passage) => {
+      const {
+        options: {
+          debug,
+        },
+      } = this;
+      if (debug === true) {
+        this.results.push(style(passage));
+        this.results.push('\n');
+      } else {
+        console.log(style(passage));
+      }
+    });
+  }
+
   scan(text) {
     try {
       for (let i = 0; i < text.length; i += 1) {
@@ -85,11 +126,11 @@ class Parser {
             break;
           }
           case '\n':
-            this.p = 1;
+            this.position = 1;
             this.line += 1;
             break;
           default:
-            this.p += 1;
+            this.position += 1;
             this.dealEfficientChar(char);
             break;
         }
@@ -98,6 +139,7 @@ class Parser {
     } catch (e) {
       this.showErrorLocation(text, e);
     }
+    return this.results;
   }
 
   dealEfficientChar(char) {
@@ -136,11 +178,11 @@ class Parser {
       case 3: {
         if (char === ';') {
           const format = this.elems.join('').trimStart();
-          this.style = parseChalk(format, this.style);
+          this.style = parseChalk(format);
           this.elems = [];
         } else if (char === ':') {
           const format = this.elems.join('').trimStart();
-          this.style = parseChalk(format, this.style);
+          this.style = parseChalk(format);
           this.status = 4;
           this.elems = [];
         } else {
@@ -150,16 +192,17 @@ class Parser {
       }
       case 4: {
         if (char === 'EOF' || char === '(' || char === '[' || char === '&') {
+          if (char === 'EOF') {
+            this.status = 0;
+            this.showText(this.elems.join('').trimEnd(), this.style);
+            delete this.elems;
+            break;
+          }
           if (char === '&') {
-            showText(this.elems.join('').trimEnd(), this.style, true);
+            this.showText(this.elems.join('').trimEnd(), this.style, true);
             this.elems =  [];
           } else {
-            showText(this.elems.join('').trimEnd(), this.style);
-          }
-          if (char === 'EOF') {
-            delete this.elems;
-            this.status = 0;
-            break;
+            this.showText(this.elems.join('').trimEnd(), this.style);
           }
           if (char === '(') {
             this.status = 1;
@@ -203,11 +246,11 @@ class Parser {
       case 7: {
         if (char === ';') {
           const format = this.elems.join('').trimStart();
-          this.style = parseChalk(format, this.style);
+          this.style = parseChalk(format);
           this.elems = [];
         } else if (char === ':') {
           const format = this.elems.join('').trimStart();
-          this.style = parseChalk(format, this.style);
+          this.style = parseChalk(format);
           this.status = 8;
           this.passages = [];
           this.elems = [];
@@ -223,7 +266,7 @@ class Parser {
         } else if (char === 'EOF' || char === '(' || char === '[') {
           this.passages.push(this.elems.join('').trimEnd());
           this.passages.shift();
-          showPassages(this.passages, this.style);
+          this.showPassages(this.passages, this.style);
           if (char === '(') {
             this.status = 1;
           }
@@ -255,4 +298,4 @@ class Parser {
   }
 }
 
-export default Parser;
+export default Fulmination;

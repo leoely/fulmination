@@ -1,16 +1,14 @@
 import { describe, expect, test, } from '@jest/globals';
 import minify from '~/lib/util/minify';
 
-describe('[lib] color text formate test case;', () => {
-  test('minify color text formate text;', async () => {
+describe('[Function] minify;', () => {
+  test('minify color text formate text should correct.', async () => {
     expect(minify(`
-      (+) dim: This is fulmination text style. (+) dim: This is fulmination text end test. |
-
-      [+] red; bold:
-        | This is text will be color as red and bold.
-        | This is a fulmination minify function test text,
-        | test this text whether or not be minify correctly,
-        | test this text minify result.
-    `)).toMatch('(+)dim:This is fulmination text style.(+)dim:This is fulmination text end test.|[+]red;bold:|This is text will be color as red and bold.|This is a fulmination minify function test text,|test this text whether or not be minify correctly,|test this text minify result.');
+      (+) bold: bold, underline and so on is chalk style. (+) underline: You can get this section document in chalk. &
+      (+) bold: text and passage use same chalk style.
+      [+] bold:
+      | style use ";" as delimiter, passage use "|" as delimiter.
+      | Passage apply style to all passage.Text apply style only to one text.
+    `)).toMatch('(+)bold:bold, underline and so on is chalk style.(+)underline:You can get this section document in chalk.&(+)bold:text and passage use same chalk style.[+]bold:|style use \";\" as delimiter, passage use \"|\" as delimiter.|Passage apply style to all passage.Text apply style only to one text.');
   });
 });

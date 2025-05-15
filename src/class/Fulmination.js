@@ -1,25 +1,19 @@
-import { stdout, } from 'process';
 import chalk from 'chalk';
-import parseChalk from '~/lib/util/parseChalk';
-import parseCtf from '~/lib/util/parseCtf';
-import ctfTemplate from '~/lib/template/ctfTemplate';
+import { HighLight, FulminationLexer, } from 'glow.js';
+import CtfParser from 'fulmination';
+import ChalkParser from '~/class/ChalkParser';
+import fulminationTemplate from '~/lib/template/fulminationTemplate';
 
-function showErrorText(text, line) {
-  console.log(' ' + chalk.gray(line) + ' ' + chalk.black.bgWhite(text));
-}
-
-function showErrorPosition(position) {
-  const stringList = [];
-  for (let i = 0; i < position + (3 - 1); i += 1) {
-    stringList.push(' ');
+function getWidth(length) {
+  let ans = 1;
+  while (true) {
+    length /= 10;
+    if (length < 1) {
+      break;
+    }
+    ans += 1;
   }
-  stringList.push(chalk.bold('~' + chalk.red('^') + '~'));
-  console.log(stringList.join(''));
-}
-
-function showBesideText(text, line) {
-  const highLightText = parseCtf(text).map((e) => ctfTemplate(e)).join('');
-  console.log(' ' + chalk.gray(line) + ' ' + chalk.black.bgWhite(highLightText));
+  return ans;
 }
 
 class Fulmination {
@@ -28,9 +22,13 @@ class Fulmination {
       debug: false,
     };
     this.options = Object.assign(defaultOptions, options);
-    this.line = 1;
+    this.line = 0;
     this.position = 1;
     this.status = 0;
+    this.chalkParser = new ChalkParser();
+    const highLight = new HighLight();
+    highLight.addLexer(FulminationLexer);
+    this.highLight = highLight;
     const {
       options: {
         debug,
@@ -42,16 +40,31 @@ class Fulmination {
   }
 
   showErrorLocation(text, error) {
+    const fulmination = new CtfParser();
     const lines = text.split('\n');
     const { line, position, } = this;
-    showErrorText(lines[line], line);
-    showErrorPosition(position);
-    if (lines[line + 1] !== undefined) {
-      showBesideText(lines[line + 1], line + 1);
+    fulmination.scan('(+): * & (+): * (+) gray: ' + line + '(+): *');
+    console.log(chalk.black.bgWhite(lines[line]));
+    const asterisks = [];
+    for (let i = 0; i < position - 1 + getWidth(line) + 2 - 1; i += 1) {
+      asterisks.push('*');
     }
-    console.log('');
-    console.log(chalk.bold(error.message));
+    fulmination.scan(
+      '(+) :' + asterisks.join('') + '(+) bold: ~ (+) red; bold: ^ (+) bold: ~ &'
+    );
+    if (lines[line + 1] !== undefined) {
+      const { highLight, } = this;
+      const hl = highLight.parse(text).map((token) => fulminationTemplate(token)).join('');
+      fulmination.scan('(+) gray: * ' + (line + 1) + '(+): *');
+      console.log((chalk.black.bgWhite(hl)));
+    }
+    console.log(chalk.bold('\n' + error.message));
     console.log(error.stack);
+  }
+
+  cleanAsteriskAndOther() {
+    this.asterisk = false;
+    this.other = false;
   }
 
   handleSpace() {
@@ -67,7 +80,7 @@ class Fulmination {
     return ans;
   }
 
-  showText(text, style, linebreak) {
+  showText(text, linebreak) {
     if (linebreak === true) {
       const {
         options: {
@@ -75,9 +88,11 @@ class Fulmination {
         },
       } = this;
       if (debug === true) {
-        this.results.push(style(text));
-        this.results.push('\n');
+        const { results, style, } = this;
+        results.push(style(text));
+        results.push('\n');
       } else {
+        const { style, } = this;
         console.log(style(text));
       }
     } else {
@@ -87,64 +102,129 @@ class Fulmination {
         },
       } = this;
       if (debug === true) {
-        this.results.push(style(text));
+        const { results, style, } = this;
+        results.push(style(text));
       } else {
+        const { style, } = this;
         process.stdout.write(style(text));
       }
     }
   }
 
-  showPassages(passages, style) {
-    passages.forEach((passage) => {
-      const {
-        options: {
-          debug,
-        },
-      } = this;
-      if (debug === true) {
-        this.results.push(style(passage));
-        this.results.push('\n');
-      } else {
-        console.log(style(passage));
-      }
-    });
+  showPassages() {
+    const { passages, } = this;
+    if (Array.isArray(passages)) {
+      passages.forEach((passage) => {
+        const {
+          options: {
+            debug,
+          },
+        } = this;
+        if (debug === true) {
+          const { style, } = this;
+          this.results.push(style(passage));
+          this.results.push('\n');
+        } else {
+          const { style, } = this;
+          console.log(style(passage));
+        }
+      });
+    } else {
+      throw new Error('[Error] The parameter section should be of array type.');
+    }
+  }
+
+  showTextAndJump(status, linebreak) {
+    const { asterisk, other, } = this;
+    if (asterisk === true && other !== true) {
+      this.showText(this.elems.join(''), linebreak);
+    } else {
+      this.showText(this.elems.join('').trimEnd(), linebreak);
+    }
+    this.status = status;
+    this.cleanAsteriskAndOther();
+  }
+
+  showPassagesAndJump(status) {
+    const { passages, elems, asterisk, other, } = this;
+    if (asterisk === true && other !== true) {
+      passages.push(elems.join(''));
+    } else {
+      passages.push(elems.join('').trimEnd());
+    }
+    passages.shift();
+    this.showPassages();
+    this.status = status;
+    this.cleanAsteriskAndOther();
+  }
+
+  dealAsterisk() {
+    this.asterisk = true;
+    this.elems.push(' ');
+  }
+
+  dealOther(char) {
+    this.other = true;
+    this.elems.push(char);
+  }
+
+  dealSpace(char) {
+    if (this.handleSpace()) {
+      this.elems.push(char);
+    }
   }
 
   scan(text) {
     try {
-      for (let i = 0; i < text.length; i += 1) {
+      for (let i = 0; i <= text.length; i += 1) {
         const char = text.charAt(i);
         switch (char) {
           case ' ': {
             const prevChar = text.charAt(i - 1);
-            if (prevChar === ' ' || prevChar === '|' || prevChar === '' ||
-              prevChar === '\n') {
-              this.p += 1;
-            } else {
-              this.dealEfficientChar(char);
+            switch (prevChar) {
+              case ' ':
+              case '|':
+              case '&':
+              case ':':
+              case ';':
+              case '':
+              case ')':
+              case ']':
+              case '\n':
+                this.position += 1;
+                break;
+              default:
+                this.dealChar(char);
+                this.position += 1;
             }
             break;
           }
           case '\n':
-            this.position = 1;
             this.line += 1;
+            this.position = 1;
             break;
           default:
+            this.dealChar(char);
             this.position += 1;
-            this.dealEfficientChar(char);
-            break;
         }
       }
-      this.dealEfficientChar('EOF');
     } catch (e) {
       this.showErrorLocation(text, e);
     }
-    return this.results;
+    const {
+      options: {
+        debug,
+      },
+    } = this;
+    if (debug === true) {
+      return this.results;
+    }
   }
 
-  dealEfficientChar(char) {
-    switch (this.status) {
-      case 0: {
+  dealChar(char) {
+    const { status, } = this;
+    switch (status) {
+      case 0:
         switch (char) {
           case '(':
             this.status = 1;
@@ -152,145 +232,167 @@ class Fulmination {
           case '[':
             this.status = 5;
             break;
+          case '':
+            break;
           default:
-            throw new Error('Ctf format should start with "(" or "[".');
+            throw new Error('[Error] This should a "(" or "[".');
         }
         break;
-      }
-      case 1: {
-        if (char === '+') {
-          this.status = 2;
-        } else {
-          throw new Error('This position should be "+".');
+      case 1:
+        switch (char) {
+          case '+':
+            this.status = 2;
+            break;
+          default:
+            throw new Error('[Error] This should be a "+".');
         }
         break;
-      }
-      case 2: {
-        if (char === ')') {
-          this.elems = [];
-          this.style = chalk;
-          this.status = 3;
-        } else {
-          throw new Error('This position should be ")".');
-        }
-        break;
-      }
-      case 3: {
-        if (char === ';') {
-          const format = this.elems.join('').trimStart();
-          this.style = parseChalk(format);
-          this.elems = [];
-        } else if (char === ':') {
-          const format = this.elems.join('').trimStart();
-          this.style = parseChalk(format);
-          this.status = 4;
-          this.elems = [];
-        } else {
-          this.elems.push(char);
-        }
-        break;
-      }
-      case 4: {
-        if (char === 'EOF' || char === '(' || char === '[' || char === '&') {
-          if (char === 'EOF') {
-            this.status = 0;
-            this.showText(this.elems.join('').trimEnd(), this.style);
-            delete this.elems;
+      case 2:
+        switch (char) {
+          case ')': {
+            const { chalkParser, } = this;
+            this.elems = [];
+            this.status = 3;
+            chalkParser.resetStyles();
             break;
           }
-          if (char === '&') {
-            this.showText(this.elems.join('').trimEnd(), this.style, true);
+          default:
+            throw new Error('[Error] This should be a ")".');
+        }
+        break;
+      case 3:
+        switch (char) {
+          case ';': {
+            const { chalkParser, } = this;
+            this.style = chalkParser.getStyles();
+            const { style, } = this;
+            chalkParser.setStyles(style);
+            break;
+          }
+          case ':': {
+            const { chalkParser, } = this;
+            this.style = chalkParser.getStyles();
+            this.status = 4;
+            const { style, } = this;
+            chalkParser.setStyles(style);
+            break;
+          }
+          default: {
+            const { chalkParser, } = this;
+            chalkParser.dealChar(char);
+          }
+        }
+        break;
+      case 4:
+        switch (char) {
+          case '':
+            this.showText(this.elems.join(''));
+            this.status = 0;
+            this.cleanAsteriskAndOther();
+            delete this.elems;
+            break;
+          case '(':
+            this.showTextAndJump(1);
+            break;
+          case '[':
+            this.showTextAndJump(5);
+            break;
+          case '&':
+            this.showTextAndJump(0, true);
             this.elems =  [];
-          } else {
-            this.showText(this.elems.join('').trimEnd(), this.style);
-          }
-          if (char === '(') {
-            this.status = 1;
-          }
-          if (char === '['){
-            this.status = 5;
-          }
-        } else {
-          if (char === '*') {
-            this.elems.push(' ');
-          } else {
-            if (char === ' ') {
-              if (this.handleSpace()) {
-                this.elems.push(char);
-              }
-            } else {
-              this.elems.push(char);
-            }
-          }
+            break;
+          case '*':
+            this.dealAsterisk();
+            break;
+          case ' ':
+            this.dealSpace(char);
+            break;
+          default:
+            this.dealOther(char);
         }
         break;
-      }
-      case 5: {
-        if (char === '+') {
-          this.status = 6;
-        } else {
-          throw new Error('This position should be "+".');
+      case 5:
+        switch (char) {
+          case '+':
+            this.status = 6;
+            break;
+          default:
+            throw new Error('[Error] This should be "+".');
         }
         break;
-      }
       case 6: {
-        if (char === ']') {
-          this.elems = [];
-          this.status = 7;
-          this.style = chalk;
-        } else {
-          throw new Error('This position should be "]".');
+        switch (char) {
+          case ']': {
+            const { chalkParser, } = this;
+            this.elems = [];
+            this.status = 7;
+            chalkParser.resetStyles();
+            break;
+          }
+          default:
+            throw new Error('[Error] This should be "]".');
         }
         break;
       }
-      case 7: {
-        if (char === ';') {
-          const format = this.elems.join('').trimStart();
-          this.style = parseChalk(format);
-          this.elems = [];
-        } else if (char === ':') {
-          const format = this.elems.join('').trimStart();
-          this.style = parseChalk(format);
-          this.status = 8;
-          this.passages = [];
-          this.elems = [];
-        } else {
-          this.elems.push(char);
+      case 7:
+        switch (char) {
+          case ';': {
+            const { chalkParser, } = this;
+            this.style = chalkParser.getStyles();
+            const { style, } = this;
+            chalkParser.setStyles(style);
+            break;
+          }
+          case ':': {
+            const { chalkParser, } = this;
+            this.style = chalkParser.getStyles();
+            this.status = 8;
+            this.passages = [];
+            const { style, } = this;
+            chalkParser.setStyles(style);
+            break;
+          }
+          default: {
+            const { chalkParser, } = this;
+            chalkParser.dealChar(char);
+          }
         }
         break;
-      }
       case 8: {
-        if (char === '|') {
-          this.passages.push(this.elems.join('').trimEnd());
-          this.elems = [];
-        } else if (char === 'EOF' || char === '(' || char === '[') {
-          this.passages.push(this.elems.join('').trimEnd());
-          this.passages.shift();
-          this.showPassages(this.passages, this.style);
-          if (char === '(') {
-            this.status = 1;
+        switch (char) {
+          case '|': {
+            const { passages, elems, asterisk, other, } = this;
+            if (asterisk === true && other !== true) {
+              passages.push(elems.join(''));
+            } else {
+              passages.push(elems.join('').trimEnd());
+            }
+            this.elems = [];
+            this.cleanAsteriskAndOther();
+            break;
           }
-          if (char === '['){
-            this.status = 5;
-          }
-          if (char === 'EOF') {
+          case '(':
+            this.showPassagesAndJump(1);
+            break;
+          case '':
+            this.showPassagesAndJump(0);
             delete this.elems;
             delete this.passages;
-            this.status = 0;
             break;
-          }
-        } else {
-          if (char === '*') {
-            this.elems.push(' ');
-          } else {
-            if (char === ' ') {
-              if (this.handleSpace()) {
-                this.elems.push(char);
-              }
-            } else {
-              this.elems.push(char);
-            }
-          }
+          case '(':
+            this.showPassagesAndJump(1);
+            break;
+          case '[':
+            this.showPassagesAndJump(5);
+            break;
+          case '*':
+            this.dealAsterisk();
+            break;
+          case ' ':
+            this.dealSpace(char);
+            break;
+          default:
+            this.dealOther(char);
         }
         break;
       }

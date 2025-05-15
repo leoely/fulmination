@@ -1,8 +1,8 @@
 {
   "name": "fulmination",
-  "version": "0.1.11",
+  "version": "1.0.2",
   "description": "Color text formate project.",
-  "main": "dist/class/CtfParser.js",
+  "main": "dist/class/Fulmination.js",
   "repository": "git@github.com:leoely/fulmination.git",
   "author": "Leo Ely",
   "license": "MIT",
@@ -27,7 +27,8 @@
   },
   "dependencies": {
     "chalk": "^2.4.2",
-    "glow.js": "^0.0.6",
+    "fulmination": "^1.0.2",
+    "glow.js": "^0.0.34",
     "gulp": "^4.0.2"
   }
 }

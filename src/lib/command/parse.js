@@ -1,11 +1,12 @@
 import path from 'path';
 import fs from 'fs';
 import chalk from 'chalk';
-import Fulmination from '~/class/Fulmination';
+import Fulmination from '~/class/fulmination';
 
 export default async function parse(...param) {
   const [file, ...rest] = param;
   const filePath = path.resolve('.', file);
   const string = fs.readFileSync(filePath).toString();
-  new Fulmination().scan(string);
+  const fulmination = new Fulmination();
+  fulmination().scan(string);
 }

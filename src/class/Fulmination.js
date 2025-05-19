@@ -1,8 +1,8 @@
 import chalk from 'chalk';
 import { HighLight, FulminationLexer, } from 'glow.js';
-import CtfParser from 'fulmination';
+import Fulmination1 from 'fulmination';
 import ChalkParser from '~/class/ChalkParser';
-import fulminationTemplate from '~/lib/template/fulminationTemplate';
+import fulminationTmpl from '~/lib/template/fulminationTmpl';
 
 function getWidth(length) {
   let ans = 1;
@@ -40,7 +40,7 @@ class Fulmination {
   }
 
   showErrorLocation(text, error) {
-    const fulmination = new CtfParser();
+    const fulmination = new Fulmination1();
     const lines = text.split('\n');
     const { line, position, } = this;
     fulmination.scan('(+): * & (+): * (+) gray: ' + line + '(+): *');
@@ -54,7 +54,7 @@ class Fulmination {
     );
     if (lines[line + 1] !== undefined) {
       const { highLight, } = this;
-      const hl = highLight.parse(text).map((token) => fulminationTemplate(token)).join('');
+      const hl = highLight.parse(text).map((token) => fulminationTmpl(token)).join('');
       fulmination.scan('(+) gray: * ' + (line + 1) + '(+): *');
       console.log((chalk.black.bgWhite(hl)));
     }

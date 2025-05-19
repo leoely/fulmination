@@ -1,6 +1,6 @@
 import chalk from 'chalk';
 
-export default function fulminationTemplate(e) {
+export default function fulminationTmpl(e) {
   const { type, elem, } = e;
   switch (type) {
     case ' ':

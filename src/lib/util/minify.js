@@ -1,48 +1,44 @@
-export default function minify(str) {
-  let strings = [];
-  for (let i = 0; i < str.length; i += 1) {
-    const char = str.charAt(i);
+export default function minify(text) {
+  let chars = [];
+  outer: for (let i = 0; i < text.length; i += 1) {
+    const char = text.charAt(i);
+    if (char.match(/^\s$/) !== null && char !== ' ') {
+      continue outer;
+    }
     switch (char) {
-      case '\n':
-        break;
       case ' ': {
-        const { length, } = strings;
-        const prevChar = str.charAt(i - 1);
-        if (prevChar !== ' ' && prevChar !== '|' && prevChar !== ''
-          && prevChar !== '\n' && prevChar !== ';' && prevChar !== ']'
-          && prevChar !== ')' && prevChar !== ':' && prevChar !== '&') {
-          strings.push(char);
+        const prevChar = text.charAt(i - 1);
+        const nextChar = text.charAt(i + 1);
+        switch (prevChar) {
+          case '':
+          case ' ':
+          case '|':
+          case ':':
+          case ';':
+          case ']':
+          case ')':
+          case '&':
+            continue outer;
+          default:
+            switch (nextChar) {
+              case '':
+              case ' ':
+              case ':':
+              case ';':
+              case '|':
+              case '(':
+              case '[':
+              case '&':
+                continue outer;
+              default:
+                chars.push(char);
+                continue outer;
+            }
         }
-        break;
       }
-      case '\t':
-        break;
       default:
-        strings.push(char);
-        break;
+        chars.push(char);
     }
   }
-  str = strings.join('');
-  strings = [];
-  for (let i = 0; i < str.length; i += 1) {
-    const char = str.charAt(i);
-    switch (char) {
-      case '\n':
-        break;
-      case ' ': {
-        const { length, } = strings;
-        const nextChar = str.charAt(i + 1);
-        if (nextChar !== '|' && nextChar !== '(' && nextChar !== '&') {
-          strings.push(char);
-        }
-        break;
-      }
-      case '\t':
-        break;
-      default:
-        strings.push(char);
-        break;
-    }
-  }
-  return strings.join('');
+  return chars.join('');
 }

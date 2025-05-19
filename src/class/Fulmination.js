@@ -69,9 +69,9 @@ class Fulmination {
 
   handleSpace() {
     let ans = false;
-    const { elems, } = this;
-    for (let i = elems.length - 1; i >= 0; i -= 1) {
-      const char = elems[i];
+    const { chars, } = this;
+    for (let i = chars.length - 1; i >= 0; i -= 1) {
+      const char = chars[i];
       if (char !== ' ' && char !== '|' && char !== '*' && char !== ':') {
         ans = true;
         break;
@@ -137,20 +137,20 @@ class Fulmination {
   showTextAndJump(status, linebreak) {
     const { asterisk, other, } = this;
     if (asterisk === true && other !== true) {
-      this.showText(this.elems.join(''), linebreak);
+      this.showText(this.chars.join(''), linebreak);
     } else {
-      this.showText(this.elems.join('').trimEnd(), linebreak);
+      this.showText(this.chars.join('').trimEnd(), linebreak);
     }
     this.status = status;
     this.cleanAsteriskAndOther();
   }
 
   showPassagesAndJump(status) {
-    const { passages, elems, asterisk, other, } = this;
+    const { passages, chars, asterisk, other, } = this;
     if (asterisk === true && other !== true) {
-      passages.push(elems.join(''));
+      passages.push(chars.join(''));
     } else {
-      passages.push(elems.join('').trimEnd());
+      passages.push(chars.join('').trimEnd());
     }
     passages.shift();
     this.showPassages();
@@ -160,17 +160,17 @@ class Fulmination {
 
   dealAsterisk() {
     this.asterisk = true;
-    this.elems.push(' ');
+    this.chars.push(' ');
   }
 
   dealOther(char) {
     this.other = true;
-    this.elems.push(char);
+    this.chars.push(char);
   }
 
   dealSpace(char) {
     if (this.handleSpace()) {
-      this.elems.push(char);
+      this.chars.push(char);
     }
   }
 
@@ -208,8 +208,8 @@ class Fulmination {
             this.position += 1;
         }
       }
-    } catch (e) {
-      this.showErrorLocation(text, e);
+    } catch (error) {
+      this.showErrorLocation(text, error);
     }
     const {
       options: {
@@ -251,7 +251,7 @@ class Fulmination {
         switch (char) {
           case ')': {
             const { chalkParser, } = this;
-            this.elems = [];
+            this.chars = [];
             this.status = 3;
             chalkParser.resetStyles();
             break;
@@ -286,10 +286,10 @@ class Fulmination {
       case 4:
         switch (char) {
           case '':
-            this.showText(this.elems.join(''));
+            this.showText(this.chars.join(''));
             this.status = 0;
             this.cleanAsteriskAndOther();
-            delete this.elems;
+            delete this.chars;
             break;
           case '(':
             this.showTextAndJump(1);
@@ -299,7 +299,7 @@ class Fulmination {
             break;
           case '&':
             this.showTextAndJump(0, true);
-            this.elems =  [];
+            this.chars =  [];
             break;
           case '*':
             this.dealAsterisk();
@@ -324,7 +324,7 @@ class Fulmination {
         switch (char) {
           case ']': {
             const { chalkParser, } = this;
-            this.elems = [];
+            this.chars = [];
             this.status = 7;
             chalkParser.resetStyles();
             break;
@@ -361,13 +361,13 @@ class Fulmination {
       case 8: {
         switch (char) {
           case '|': {
-            const { passages, elems, asterisk, other, } = this;
+            const { passages, chars, asterisk, other, } = this;
             if (asterisk === true && other !== true) {
-              passages.push(elems.join(''));
+              passages.push(chars.join(''));
             } else {
-              passages.push(elems.join('').trimEnd());
+              passages.push(chars.join('').trimEnd());
             }
-            this.elems = [];
+            this.chars = [];
             this.cleanAsteriskAndOther();
             break;
           }
@@ -376,7 +376,7 @@ class Fulmination {
             break;
           case '':
             this.showPassagesAndJump(0);
-            delete this.elems;
+            delete this.chars;
             delete this.passages;
             break;
           case '(':

@@ -30,13 +30,13 @@ class ChalkParser {
   getListStyle(char, name) {
     const { style, } = this;
     if (char >= '0' && char <= '9') {
-      this.elems.push(char);
+      this.chars.push(char);
     } else if (char === ',') {
-      this.ints.push(parseInt(this.elems.join('')));
-      this.elems = [];
+      this.ints.push(parseInt(this.chars.join('')));
+      this.chars = [];
     } else if (char === ')') {
-      this.ints.push(parseInt(this.elems.join('')));
-      this.elems = [];
+      this.ints.push(parseInt(this.chars.join('')));
+      this.chars = [];
       const { ints, } = this;
       if (ints.length === 3) {
         return style[name](...ints);
@@ -56,7 +56,7 @@ class ChalkParser {
 
   initParseListStyle() {
     this.ints = [];
-    this.elems = [];
+    this.chars = [];
   }
 
   resetStyles() {

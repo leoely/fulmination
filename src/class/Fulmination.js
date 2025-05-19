@@ -175,6 +175,14 @@ class Fulmination {
   }
 
   scan(text) {
+    return this.dealText(text, this.dealChar.bind(this));
+  }
+
+  scanEscape(text) {
+    return this.dealText(text, this.dealCharEscape.bind(this));
+  }
+
+  dealText(text, dealMethod) {
     try {
       for (let i = 0; i <= text.length; i += 1) {
         const char = text.charAt(i);
@@ -194,7 +202,7 @@ class Fulmination {
                 this.position += 1;
                 break;
               default:
-                this.dealChar(char);
+                dealMethod(char);
                 this.position += 1;
             }
             break;
@@ -204,7 +212,7 @@ class Fulmination {
             this.position = 1;
             break;
           default:
-            this.dealChar(char);
+            dealMethod(char);
             this.position += 1;
         }
       }
@@ -219,6 +227,19 @@ class Fulmination {
     if (debug === true) {
       return this.results;
     }
+  }
+
+  dealCharEscape(char) {
+    const { status, } = this;
+    switch (status) {
+      case 4:
+      case 8:
+        break;
+      default:
+        throw new Error('[Error] Escape scan must be in status 4 and 8.');
+    }
+    this.other = true;
+    this.chars.push(char);
   }
 
   dealChar(char) {

@@ -14,7 +14,7 @@ async function main() {
       await parse(...rest);
       break;
     default:
-      help(...rest);
+      help();
       break;
   }
   process.exit(0);

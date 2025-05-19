@@ -3,7 +3,7 @@ import fs from 'fs';
 import chalk from 'chalk';
 import minify from '~/lib/util/minify';
 
-export default async function minify(...param) {
+export default async function compress(...param) {
   const [file, ...rest] = param;
   const filePath = path.resolve('.', file);
   const string = fs.readFileSync(filePath).toString();

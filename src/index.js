@@ -1,8 +1,10 @@
-import chalk from 'chalk';
-import Fulmination from '~/class/Fulmination';
+//import Fulmination from '~/class/Fulmination';
 
-const fulmination = new Fulmination();
-fulmination.scan(`
-  (+) green; bold: * == (+) bold: * Cluster (+) bold; dim: * display structure. &
-  (+) green; bold: ** └─ (+) : * | (+) : *
-`);
+//const fulmination = new Fulmination();
+//fulmination.scan(`
+  //*+) green; bold: * == (+) bold: * Cluster (+) bold; dim: * display structure. &
+  //(+) green; bold: ** └─ (+) : * | (+) : *
+//`);
+import help from '~/lib/command/help';
+
+help();

@@ -1,6 +1,6 @@
 {
   "name": "fulmination",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Color text formate project.",
   "main": "dist/class/Fulmination.js",
   "repository": "git@github.com:leoely/fulmination.git",
@@ -27,7 +27,7 @@
   },
   "dependencies": {
     "chalk": "^2.4.2",
-    "fulmination": "^1.0.5",
+    "fulmination": "^1.0.6",
     "glow.js": "^0.0.34",
     "gulp": "^4.0.2",
     "mien": "^0.1.7"

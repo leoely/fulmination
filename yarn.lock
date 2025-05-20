@@ -2728,13 +2728,13 @@ fsevents@^2.3.2, fsevents@~2.3.2:
   resolved "https://registry.yarnpkg.com/fsevents/-/fsevents-2.3.3.tgz#cac6407785d03675a2a5e1a5305c697b347d90d6"
   integrity sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==
 
-fulmination@^1.0.4:
-  version "1.0.4"
-  resolved "https://registry.yarnpkg.com/fulmination/-/fulmination-1.0.4.tgz#ce22635109845e46157ca860592eeaea7c45d460"
-  integrity sha512-KEclMhKuzk1FWgcLvhZ/2yCCFqUDvFXV5SuMyvUBB8VS+/Zq39CyWLD5SfOuAKNBHQZCoRgQ2KN2bd8OUGzhPA==
+fulmination@^1.0.6:
+  version "1.0.6"
+  resolved "https://registry.yarnpkg.com/fulmination/-/fulmination-1.0.6.tgz#6ceb262719f34e10fd3ea9dc41be4ced0a82735f"
+  integrity sha512-zsEq93tD4sL/9iAf6xPdtfRUfkvBw1RT9BhQsxpuom7pQIFuU5qlkSoMmj2mGAmNe20qmhg7E4oPhUfsgv/XSg==
   dependencies:
     chalk "^2.4.2"
-    fulmination "^1.0.4"
+    fulmination "^1.0.6"
     glow.js "^0.0.34"
     gulp "^4.0.2"
     mien "^0.1.7"

@@ -42,9 +42,11 @@ class Fulmination {
     const fulmination = new Fulmination1();
     const lines = text.split('\n');
     const { line, position, } = this;
-    fulmination.scan('(+): * & (+): * (+) gray: ' + line + '(+): * (+) black; bgWhite: ', true);
-    fulmination.scanEscape(lines[line]);
-    fulmination.scan('(+): * &');
+    fulmination.scanAll([
+      ['(+): * & (+): * (+) gray: ' + line + '(+): * (+) black; bgWhite: ', 1],
+      [lines[line], 2],
+      ['(+): * &', 0]
+    ]);
     const asterisks = [];
     for (let i = 0; i < position - 1 + getWidth(line) + 2 - 1; i += 1) {
       asterisks.push('*');
@@ -55,13 +57,17 @@ class Fulmination {
     if (lines[line + 1] !== undefined) {
       const { highLight, } = this;
       const hl = highLight.parse(text).map((token) => fulminationTmpl(token)).join('');
-      fulmination.scan('(+) gray: * ' + (line + 1) + '(+): * (+) black; bgWhite: ');
-      fulmination.scanEscape(hl, true);
-      fulmination.scan('(+): &');
+      fulmination.scanAll([
+        ['(+) gray: * ' + (line + 1) + '(+): * (+) black; bgWhite: ', 1],
+        [hl, 2],
+        ['(+): &', 0],
+      ]);
     }
-    fulmination.scan('(+) bold: ')
-    fulmination.scanEscape(error.message, true);
-    fulmination.scan('(+): * &');
+    fulmination.scanAll([
+      ['(+) bold: ', 1],
+      [error.message, 2],
+      ['(+): * &', 0]
+    ]);
     console.log(error.stack);
   }
 
@@ -176,6 +182,30 @@ class Fulmination {
   dealSpace(char) {
     if (this.handleSpace()) {
       this.chars.push(char);
+    }
+  }
+
+  scanAll(array) {
+    if (Array.isArray(array)) {
+      array.map((elem) => {
+        const [text, code] = elem;
+        switch (code) {
+          case 0:
+            this.scan(text);
+            break;
+          case 1:
+            this.scan(text, true);
+            break;
+          case 2:
+            this.scanEscape(text);
+            break;
+          default:
+            throw new Error('[Error] parameter code can only the interval [0, 2]');
+        }
+      });
+      return this.results;
+    } else {
+      throw new Error('[Error] Method scanAll parameters which should be a array type');
     }
   }
 

@@ -53,4 +53,16 @@ describe('[Class] Fulmination;', () => {
     expect(JSON.stringify(fulmination.scanEscape('(+) dim; underline: test the results of scaning escape.'))).toMatch('[\"\\u001b[1m\\u001b[31m(+) dim; underline: test the results of scaning escape.\\u001b[39m\\u001b[22m\",\"\\n\"]');
     expect(JSON.stringify(fulmination.scan('(+) dim; underline: test the result of scaning.'))).toMatch('[\"\\u001b[1m\\u001b[31m(+) dim; underline: test the results of scaning escape.\\u001b[39m\\u001b[22m\",\"\\n\",\"\\u001b[2m\\u001b[4mtest the result of scaning.\\u001b[24m\\u001b[22m\"]');
   });
+
+  test('Fulmination scan all should output correct results.', () => {
+    const fulmination = new Fulmination({ debug: true, });
+    expect(JSON.stringify(fulmination.scanAll([
+      [`
+        [+] bold; red:
+        |
+      `, 1],
+      ['(+) dim; underline: test the results of scaning escape.', 2],
+      ['(+) dim; underline: test the result of scaning.', 0],
+    ]))).toMatch('[\"\\u001b[1m\\u001b[31m(+) dim; underline: test the results of scaning escape.\\u001b[39m\\u001b[22m\",\"\\n\",\"\\u001b[2m\\u001b[4mtest the result of scaning.\\u001b[24m\\u001b[22m\"]');
+  });
 });

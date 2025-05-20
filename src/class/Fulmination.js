@@ -1,4 +1,3 @@
-import chalk from 'chalk';
 import { HighLight, FulminationLexer, } from 'glow.js';
 import Fulmination1 from 'fulmination';
 import ChalkParser from '~/class/ChalkParser';
@@ -43,8 +42,9 @@ class Fulmination {
     const fulmination = new Fulmination1();
     const lines = text.split('\n');
     const { line, position, } = this;
-    fulmination.scan('(+): * & (+): * (+) gray: ' + line + '(+): *');
-    console.log(chalk.black.bgWhite(lines[line]));
+    fulmination.scan('(+): * & (+): * (+) gray: ' + line + '(+): * (+) black; bgWhite: ', true);
+    fulmination.scanEscape(lines[line]);
+    fulmination.scan('(+): * &');
     const asterisks = [];
     for (let i = 0; i < position - 1 + getWidth(line) + 2 - 1; i += 1) {
       asterisks.push('*');
@@ -55,10 +55,13 @@ class Fulmination {
     if (lines[line + 1] !== undefined) {
       const { highLight, } = this;
       const hl = highLight.parse(text).map((token) => fulminationTmpl(token)).join('');
-      fulmination.scan('(+) gray: * ' + (line + 1) + '(+): *');
-      console.log((chalk.black.bgWhite(hl)));
+      fulmination.scan('(+) gray: * ' + (line + 1) + '(+): * (+) black; bgWhite: ');
+      fulmination.scanEscape(hl, true);
+      fulmination.scan('(+): &');
     }
-    console.log(chalk.bold('\n' + error.message));
+    fulmination.scan('(+) bold: ')
+    fulmination.scanEscape(error.message, true);
+    fulmination.scan('(+): * &');
     console.log(error.stack);
   }
 
@@ -154,7 +157,9 @@ class Fulmination {
     }
     passages.shift();
     this.showPassages();
-    this.status = status;
+    if (status !== undefined) {
+      this.status = status;
+    }
     this.cleanAsteriskAndOther();
   }
 
@@ -174,12 +179,42 @@ class Fulmination {
     }
   }
 
-  scan(text) {
-    return this.dealText(text, this.dealChar.bind(this));
+  scan(text, end) {
+    this.end = end;
+    const results = this.dealText(text, this.dealChar.bind(this));
+    delete this.end;
+    return results;
   }
 
   scanEscape(text) {
-    return this.dealText(text, this.dealCharEscape.bind(this));
+    return this.dealTextEscape(text, this.dealCharEscape.bind(this));
+  }
+
+  dealTextEscape(text, dealMethod) {
+    try {
+      for (let i = 0; i <= text.length; i += 1) {
+        const char = text.charAt(i);
+        switch (char) {
+          case '\n':
+            this.line += 1;
+            this.position = 1;
+            break;
+          default:
+            dealMethod(char);
+            this.position += 1;
+        }
+      }
+    } catch (error) {
+      this.showErrorLocation(text, error);
+    }
+    const {
+      options: {
+        debug,
+      },
+    } = this;
+    if (debug === true) {
+      return this.results;
+    }
   }
 
   dealText(text, dealMethod) {
@@ -239,7 +274,24 @@ class Fulmination {
         throw new Error('[Error] Escape scan must be in status 4 and 8.');
     }
     this.other = true;
-    this.chars.push(char);
+    switch (char) {
+      case '':
+        switch (status) {
+          case 4:
+            this.showText(this.chars.join(''));
+            this.cleanAsteriskAndOther();
+            this.status = 0;
+            this.chars = [];
+            break;
+          case 8:
+            this.showPassagesAndJump();
+            this.passages = [];
+            break;
+        }
+        break;
+      default:
+        this.chars.push(char);
+    }
   }
 
   dealChar(char) {
@@ -306,12 +358,16 @@ class Fulmination {
         break;
       case 4:
         switch (char) {
-          case '':
-            this.showText(this.chars.join(''));
-            this.status = 0;
-            this.cleanAsteriskAndOther();
-            delete this.chars;
+          case '': {
+            const { end, } = this;
+            if (this.end !== true) {
+              this.showText(this.chars.join(''));
+              this.status = 0;
+              this.cleanAsteriskAndOther();
+              delete this.chars;
+            }
             break;
+          }
           case '(':
             this.showTextAndJump(1);
             break;
@@ -395,11 +451,15 @@ class Fulmination {
           case '(':
             this.showPassagesAndJump(1);
             break;
-          case '':
-            this.showPassagesAndJump(0);
-            delete this.chars;
-            delete this.passages;
+          case '': {
+            const { end, } = this;
+            if (end !== true) {
+              this.showPassagesAndJump(0);
+              delete this.chars;
+              delete this.passages;
+            }
             break;
+          }
           case '(':
             this.showPassagesAndJump(1);
             break;

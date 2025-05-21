@@ -1,6 +1,7 @@
 import { HighLight, FulminationLexer, } from 'glow.js';
 import Fulmination1 from 'fulmination';
 import ChalkParser from '~/class/ChalkParser';
+import IntegerParser from '~/class/IntegerParser';
 import fulminationTmpl from '~/lib/template/fulminationTmpl';
 
 function getWidth(length) {
@@ -15,6 +16,10 @@ function getWidth(length) {
   return ans;
 }
 
+function isDecimal(char) {
+  return char >= '0' && char <= '9';
+}
+
 class Fulmination {
   constructor(options = {}) {
     const defaultOptions =  {
@@ -25,6 +30,7 @@ class Fulmination {
     this.position = 1;
     this.status = 0;
     this.chalkParser = new ChalkParser();
+    this.integerParser = new IntegerParser();
     const {
       options: {
         debug,
@@ -169,6 +175,12 @@ class Fulmination {
     this.cleanAsteriskAndOther();
   }
 
+  escapeAndJump(char, status) {
+    this.keep = true;
+    this.dealOther(char);
+    this.status = status;
+  }
+
   dealAsterisk() {
     this.asterisk = true;
     this.chars.push(' ');
@@ -191,13 +203,13 @@ class Fulmination {
         const [text, code] = elem;
         switch (code) {
           case 0:
-            this.scan(text);
+            this.scan(text, undefined, true);
             break;
           case 1:
-            this.scan(text, true);
+            this.scan(text, true, true);
             break;
           case 2:
-            this.scanEscape(text);
+            this.scanEscape(text, true);
             break;
           default:
             throw new Error('[Error] parameter code can only the interval [0, 2]');
@@ -209,15 +221,36 @@ class Fulmination {
     }
   }
 
-  scan(text, end) {
+  scan(text, end, keep) {
     this.end = end;
     const results = this.dealText(text, this.dealChar.bind(this));
     delete this.end;
-    return results;
+    const {
+      options: {
+        debug,
+      },
+    } = this;
+    if (debug === true){
+      if (keep !== true) {
+        this.results = [];
+      }
+      return results;
+    }
   }
 
-  scanEscape(text) {
-    return this.dealTextEscape(text, this.dealCharEscape.bind(this));
+  scanEscape(text, keep) {
+    const results = this.dealTextEscape(text, this.dealCharEscape.bind(this));
+    const {
+      options: {
+        debug,
+      },
+    } = this;
+    if (debug === true) {
+      if (keep !== true) {
+        this.results = [];
+      }
+      return results;
+    }
   }
 
   dealTextEscape(text, dealMethod) {
@@ -253,9 +286,9 @@ class Fulmination {
         const char = text.charAt(i);
         switch (char) {
           case ' ': {
-            const beforeChar = text.charAt(i - 2);
             const previousChar = text.charAt(i - 1);
-            if (beforeChar !== '"') {
+            const { keep, } = this;
+            if (keep !== true) {
               switch (previousChar) {
                 case ' ':
                 case '|':
@@ -304,10 +337,10 @@ class Fulmination {
     const { status, } = this;
     switch (status) {
       case 4:
-      case 9:
+      case 10:
         break;
       default:
-        throw new Error('[Error] Escape scan must be in status 4 and 9.');
+        throw new Error('[Error] Escape scan must be in status 4 and 10.');
     }
     this.other = true;
     switch (char) {
@@ -319,7 +352,7 @@ class Fulmination {
             this.status = 0;
             this.chars = [];
             break;
-          case 9:
+          case 10:
             this.showPassagesAndJump();
             this.passages = [];
             break;
@@ -339,7 +372,7 @@ class Fulmination {
             this.status = 1;
             break;
           case '[':
-            this.status = 6;
+            this.status = 7;
             break;
           case '':
             break;
@@ -411,7 +444,7 @@ class Fulmination {
             this.showTextAndJump(1);
             break;
           case '[':
-            this.showTextAndJump(6);
+            this.showTextAndJump(7);
             break;
           case '&':
             this.showTextAndJump(0, true);
@@ -422,30 +455,66 @@ class Fulmination {
             break;
           case ' ':
             this.dealSpace(char);
+            this.keep = false;
             break;
           default:
             this.dealOther(char);
         }
         break;
       case 5:
-        this.dealOther(char);
-        this.status = 4;
+        switch (char) {
+          case '(':
+          case ')':
+          case '[':
+          case ']':
+          case '+':
+          case ':':
+          case ';':
+          case '&':
+          case '"':
+          case '*':
+            this.escapeAndJump(char, 4);
+            break;
+          default: {
+            if (char === 'b') {
+              this.keep = true;
+              this.status = 6;
+            } else if (isDecimal(char)) {
+              const { integerParser, } = this;
+              integerParser.resetInteger();
+              integerParser.dealChar(char);
+              this.keep = true;
+              this.status = 13;
+            } else {
+              throw new Error('[Error] Escape character format error. ');
+            }
+          }
+        }
         break;
       case 6:
         switch (char) {
+          case '"':
+            this.status = 4;
+            break;
+          default:
+            this.chars.push(char);
+        }
+        break;
+      case 7:
+        switch (char) {
           case '+':
-            this.status = 7;
+            this.status = 8;
             break;
           default:
             throw new Error('[Error] This should be "+".');
         }
         break;
-      case 7: {
+      case 8: {
         switch (char) {
           case ']': {
             const { chalkParser, } = this;
             this.chars = [];
-            this.status = 8;
+            this.status = 9;
             chalkParser.resetStyles();
             break;
           }
@@ -454,7 +523,7 @@ class Fulmination {
         }
         break;
       }
-      case 8:
+      case 9:
         switch (char) {
           case ';': {
             const { chalkParser, } = this;
@@ -466,7 +535,7 @@ class Fulmination {
           case ':': {
             const { chalkParser, } = this;
             this.style = chalkParser.getStyles();
-            this.status = 9;
+            this.status = 10;
             this.passages = [];
             const { style, } = this;
             chalkParser.setStyles(style);
@@ -478,7 +547,7 @@ class Fulmination {
           }
         }
         break;
-      case 9: {
+      case 10: {
         switch (char) {
           case '|': {
             const { passages, chars, asterisk, other, } = this;
@@ -492,7 +561,7 @@ class Fulmination {
             break;
           }
           case '"':
-            this.status = 10;
+            this.status = 11;
             break;
           case '(':
             this.showPassagesAndJump(1);
@@ -510,23 +579,63 @@ class Fulmination {
             this.showPassagesAndJump(1);
             break;
           case '[':
-            this.showPassagesAndJump(6);
+            this.showPassagesAndJump(7);
             break;
           case '*':
             this.dealAsterisk();
             break;
           case ' ':
             this.dealSpace(char);
+            this.keep = false;
             break;
           default:
             this.dealOther(char);
         }
         break;
       }
-      case 10:
-        this.dealOther(char);
-        this.status = 9;
+      case 11:
+        switch (char) {
+          case '(':
+          case ')':
+          case '[':
+          case ']':
+          case '+':
+          case ':':
+          case ';':
+          case '&':
+          case '"':
+          case '*':
+            this.escapeAndJump(char, 10);
+            break;
+          default:
+            this.keep = true;
+            this.dealOther(char);
+        }
         break;
+      case 12:
+        break;
+      case 13: {
+        if (isDecimal(char)) {
+          const { integerParser, } = this;
+          integerParser.dealChar(char);
+        } else {
+          const { integerParser, } = this;
+          this.step = integerParser.getInteger();
+          this.chars.push(char);
+          this.status = 14;
+        }
+        break;
+      }
+      case 14: {
+        const { step, } = this;
+        if (step === 1) {
+          this.status = 4;
+        } else {
+          this.step -= 1;
+        }
+        this.chars.push(char);
+        break;
+      }
     }
   }
 }

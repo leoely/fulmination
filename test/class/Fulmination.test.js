@@ -24,7 +24,7 @@ describe('[Class] Fulmination;', () => {
       (+) bold: bold, underline and so on is chalk style. (+) underline: You can get this section document in chalk. &
       (+) bold: text and passage use same chalk style.
       [+] bold:
-      | style use ";" as delimiter, passage use "|" as delimiter.
+      | style use "";"" as delimiter, passage use ""|"" as delimiter.
       | Passage apply style to all passage.Text apply style only to one text.
     `))).toMatch('[\"\\u001b[1mbold, underline and so on is chalk style.\\u001b[22m\",\"\\u001b[4mYou can get this section document in chalk.\\u001b[24m\",\"\\n\",\"\\u001b[1mtext and passage use same chalk style.\\u001b[22m\",\"\\u001b[1mstyle use \\\";\\\" as delimiter, passage use \\\"\\u001b[22m\",\"\\n\",\"\\u001b[1m\\\" as delimiter.\\u001b[22m\",\"\\n\",\"\\u001b[1mPassage apply style to all passage.Text apply style only to one text.\\u001b[22m\",\"\\n\"]');
   });
@@ -37,11 +37,11 @@ describe('[Class] Fulmination;', () => {
     `))).toMatch('[\"\\u001b[32m\\u001b[1m ==\\u001b[22m\\u001b[39m\",\"\\u001b[1m Cluster\\u001b[22m\",\"\\u001b[1m\\u001b[2m display structure.\\u001b[1m\\u001b[22m\",\"\\n\",\"\\u001b[32m\\u001b[1m  └─\\u001b[22m\\u001b[39m\",\" |\",\" \"]');
   });
 
-  test('Fulmination scanning escape result should be correct..', () => {
+  test('Fulmination scanning escape result should be correct.', () => {
     const fulmination = new Fulmination({ debug: true, });
     fulmination.scan('(+) bold; red: ', true);
     expect(JSON.stringify(fulmination.scanEscape('(+) dim; underline: test the results of scanning escape.'))).toMatch('[\"\\u001b[1m\\u001b[31m(+) dim; underline: test the results of scanning escape.\\u001b[39m\\u001b[22m\"]');
-    expect(JSON.stringify(fulmination.scan('(+) dim; underline: test the result of scanning.'))).toMatch('[\"\\u001b[1m\\u001b[31m(+) dim; underline: test the results of scanning escape.\\u001b[39m\\u001b[22m\",\"\\u001b[2m\\u001b[4mtest the result of scanning.\\u001b[24m\\u001b[22m\"]');
+    expect(JSON.stringify(fulmination.scan('(+) dim; underline: test the result of scanning.'))).toMatch('[\"\\u001b[2m\\u001b[4mtest the result of scanning.\\u001b[24m\\u001b[22m\"]');
   });
 
   test('Fulmination scanning escape multi-line results should be correct.', () => {
@@ -51,7 +51,7 @@ describe('[Class] Fulmination;', () => {
       |
     `, true);
     expect(JSON.stringify(fulmination.scanEscape('(+) dim; underline: test the results of scaning escape.'))).toMatch('[\"\\u001b[1m\\u001b[31m(+) dim; underline: test the results of scaning escape.\\u001b[39m\\u001b[22m\",\"\\n\"]');
-    expect(JSON.stringify(fulmination.scan('(+) dim; underline: test the result of scaning.'))).toMatch('[\"\\u001b[1m\\u001b[31m(+) dim; underline: test the results of scaning escape.\\u001b[39m\\u001b[22m\",\"\\n\",\"\\u001b[2m\\u001b[4mtest the result of scaning.\\u001b[24m\\u001b[22m\"]');
+    expect(JSON.stringify(fulmination.scan('(+) dim; underline: test the result of scaning.'))).toMatch('[\"\\u001b[2m\\u001b[4mtest the result of scaning.\\u001b[24m\\u001b[22m\"]');
   });
 
   test('Fulmination scan all should output correct results.', () => {
@@ -66,12 +66,18 @@ describe('[Class] Fulmination;', () => {
     ]))).toMatch('[\"\\u001b[1m\\u001b[31m(+) dim; underline: test the results of scaning escape.\\u001b[39m\\u001b[22m\",\"\\n\",\"\\u001b[2m\\u001b[4mtest the result of scaning.\\u001b[24m\\u001b[22m\"]');
   });
 
-  test('Fulmination transfer symbols should be recoginizable..', () => {
+  test('Fulmination transfer symbols should be recoginizable.', () => {
     const fulmination = new Fulmination({ debug: true, });
     expect(JSON.stringify(fulmination.scan('(+) bold: "("+") dim": underline: test escape single line.'))).toMatch('[\"\\u001b[1m(+) dim: underline:test escape single line.\\u001b[22m\"]');
     expect(JSON.stringify(fulmination.scan(`
       [+] bold:
       | "("+") dim": underline": test escape symbols multi-line.
-    `))).toMatch('[\"\\u001b[1m(+) dim: underline:test escape single line.\\u001b[22m\",\"\\u001b[1m(+) dim: underline: test escape symbols multi-line.\\u001b[22m\",\"\\n\"]');
+    `))).toMatch('[\"\\u001b[1m(+) dim: underline: test escape symbols multi-line.\\u001b[22m\",\"\\n\"]');
+  });
+
+  test('Fulmination should be able to handle the transfer of text in sections.', () => {
+    const fulmination = new Fulmination({ debug: true, });
+    expect(JSON.stringify(fulmination.scan('(+) bold: "8(+) dim: underline: test escape single line.'))).toMatch('[\"\\u001b[1m(+) dim: underline: test escape single line.\\u001b[22m\"]');
+    expect(JSON.stringify(fulmination.scan('(+) bold: "b(+) dim: underline:" test escape single line.'))).toMatch('[\"\\u001b[1m(+) dim: underline: test escape single line.\\u001b[22m\"]');
   });
 });

@@ -5,7 +5,4 @@ const fulmination = new Fulmination();
   //*+) green; bold: * == (+) bold: * Cluster (+) bold; dim: * display structure. &
   //(+) green; bold: ** └─ (+) : * | (+) : *
 //`);
-fulmination.scan(`
-  [+] bold:
-  | "("+") dim": underline": test escape symbols multi-line.
-`);
+fulmination.scan('(+) dim; underline: test the result of scanning.');

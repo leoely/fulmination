@@ -24,7 +24,7 @@ describe('[Class] Fulmination;', () => {
       (+) bold: bold, underline and so on is chalk style. (+) underline: You can get this section document in chalk. &
       (+) bold: text and passage use same chalk style.
       [+] bold:
-      | style use ";" as delimiter, passage use "|" as delimiter.
+      | style use "";"" as delimiter, passage use ""|"" as delimiter.
       | Passage apply style to all passage.Text apply style only to one text.
     `))).toMatch('[\"\\u001b[1mbold, underline and so on is chalk style.\\u001b[22m\",\"\\u001b[4mYou can get this section document in chalk.\\u001b[24m\",\"\\n\",\"\\u001b[1mtext and passage use same chalk style.\\u001b[22m\",\"\\u001b[1mstyle use \\\";\\\" as delimiter, passage use \\\"\\u001b[22m\",\"\\n\",\"\\u001b[1m\\\" as delimiter.\\u001b[22m\",\"\\n\",\"\\u001b[1mPassage apply style to all passage.Text apply style only to one text.\\u001b[22m\",\"\\n\"]');
   });

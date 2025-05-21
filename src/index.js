@@ -6,6 +6,9 @@ const fulmination = new Fulmination();
   //(+) green; bold: ** └─ (+) : * | (+) : *
 //`);
 fulmination.scan(`
+  (+) bold: bold, underline and so on is chalk style. (+) underline: You can get this section document in chalk. &
+  (+) bold: text and passage use same chalk style.
   [+] bold:
-  | "("+") dim": underline": test escape symbols multi-line.
+  | style use "";"" as delimiter, passage use ""|"" as delimiter.
+  | Passage apply style to all passage.Text apply style only to one text.
 `);

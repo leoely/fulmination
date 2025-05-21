@@ -65,4 +65,13 @@ describe('[Class] Fulmination;', () => {
       ['(+) dim; underline: test the result of scaning.', 0],
     ]))).toMatch('[\"\\u001b[1m\\u001b[31m(+) dim; underline: test the results of scaning escape.\\u001b[39m\\u001b[22m\",\"\\n\",\"\\u001b[2m\\u001b[4mtest the result of scaning.\\u001b[24m\\u001b[22m\"]');
   });
+
+  test('Fulmination transfer symbols should be recoginizable..', () => {
+    const fulmination = new Fulmination({ debug: true, });
+    expect(JSON.stringify(fulmination.scan('(+) bold: "("+") dim": underline: test escape single line.'))).toMatch('[\"\\u001b[1m(+) dim: underline:test escape single line.\\u001b[22m\"]');
+    expect(JSON.stringify(fulmination.scan(`
+      [+] bold:
+      | "("+") dim": underline": test escape symbols multi-line.
+    `))).toMatch('[\"\\u001b[1m(+) dim: underline:test escape single line.\\u001b[22m\",\"\\u001b[1m(+) dim: underline: test escape symbols multi-line.\\u001b[22m\",\"\\n\"]');
+  });
 });

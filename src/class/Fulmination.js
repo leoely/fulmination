@@ -81,7 +81,7 @@ class Fulmination {
     const { chars, } = this;
     for (let i = chars.length - 1; i >= 0; i -= 1) {
       const char = chars[i];
-      if (char !== ' ' && char !== '|' && char !== '*' && char !== ':') {
+      if (char !== ' ') {
         ans = true;
         break;
       }
@@ -253,22 +253,28 @@ class Fulmination {
         const char = text.charAt(i);
         switch (char) {
           case ' ': {
-            const prevChar = text.charAt(i - 1);
-            switch (prevChar) {
-              case ' ':
-              case '|':
-              case '&':
-              case ':':
-              case ';':
-              case '':
-              case ')':
-              case ']':
-              case '\n':
-                this.position += 1;
-                break;
-              default:
-                dealMethod(char);
-                this.position += 1;
+            const beforeChar = text.charAt(i - 2);
+            const previousChar = text.charAt(i - 1);
+            if (beforeChar !== '"') {
+              switch (previousChar) {
+                case ' ':
+                case '|':
+                case '&':
+                case ':':
+                case ';':
+                case '':
+                case ')':
+                case ']':
+                case '\n':
+                  this.position += 1;
+                  break;
+                default:
+                  dealMethod(char);
+                  this.position += 1;
+              }
+            } else {
+              dealMethod(char);
+              this.position += 1;
             }
             break;
           }
@@ -298,10 +304,10 @@ class Fulmination {
     const { status, } = this;
     switch (status) {
       case 4:
-      case 8:
+      case 9:
         break;
       default:
-        throw new Error('[Error] Escape scan must be in status 4 and 8.');
+        throw new Error('[Error] Escape scan must be in status 4 and 9.');
     }
     this.other = true;
     switch (char) {
@@ -313,7 +319,7 @@ class Fulmination {
             this.status = 0;
             this.chars = [];
             break;
-          case 8:
+          case 9:
             this.showPassagesAndJump();
             this.passages = [];
             break;
@@ -333,7 +339,7 @@ class Fulmination {
             this.status = 1;
             break;
           case '[':
-            this.status = 5;
+            this.status = 6;
             break;
           case '':
             break;
@@ -390,7 +396,7 @@ class Fulmination {
         switch (char) {
           case '': {
             const { end, } = this;
-            if (this.end !== true) {
+            if (end !== true) {
               this.showText(this.chars.join(''));
               this.status = 0;
               this.cleanAsteriskAndOther();
@@ -398,11 +404,14 @@ class Fulmination {
             }
             break;
           }
+          case '"':
+            this.status = 5;
+            break;
           case '(':
             this.showTextAndJump(1);
             break;
           case '[':
-            this.showTextAndJump(5);
+            this.showTextAndJump(6);
             break;
           case '&':
             this.showTextAndJump(0, true);
@@ -419,20 +428,24 @@ class Fulmination {
         }
         break;
       case 5:
+        this.dealOther(char);
+        this.status = 4;
+        break;
+      case 6:
         switch (char) {
           case '+':
-            this.status = 6;
+            this.status = 7;
             break;
           default:
             throw new Error('[Error] This should be "+".');
         }
         break;
-      case 6: {
+      case 7: {
         switch (char) {
           case ']': {
             const { chalkParser, } = this;
             this.chars = [];
-            this.status = 7;
+            this.status = 8;
             chalkParser.resetStyles();
             break;
           }
@@ -441,7 +454,7 @@ class Fulmination {
         }
         break;
       }
-      case 7:
+      case 8:
         switch (char) {
           case ';': {
             const { chalkParser, } = this;
@@ -453,7 +466,7 @@ class Fulmination {
           case ':': {
             const { chalkParser, } = this;
             this.style = chalkParser.getStyles();
-            this.status = 8;
+            this.status = 9;
             this.passages = [];
             const { style, } = this;
             chalkParser.setStyles(style);
@@ -465,7 +478,7 @@ class Fulmination {
           }
         }
         break;
-      case 8: {
+      case 9: {
         switch (char) {
           case '|': {
             const { passages, chars, asterisk, other, } = this;
@@ -478,6 +491,9 @@ class Fulmination {
             this.cleanAsteriskAndOther();
             break;
           }
+          case '"':
+            this.status = 10;
+            break;
           case '(':
             this.showPassagesAndJump(1);
             break;
@@ -494,7 +510,7 @@ class Fulmination {
             this.showPassagesAndJump(1);
             break;
           case '[':
-            this.showPassagesAndJump(5);
+            this.showPassagesAndJump(6);
             break;
           case '*':
             this.dealAsterisk();
@@ -507,6 +523,10 @@ class Fulmination {
         }
         break;
       }
+      case 10:
+        this.dealOther(char);
+        this.status = 9;
+        break;
     }
   }
 }

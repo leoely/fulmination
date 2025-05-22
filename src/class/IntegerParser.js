@@ -1,4 +1,4 @@
-class NumberParser {
+class IntegerParser {
   constructor() {
     this.integer = 0;
   }
@@ -29,4 +29,4 @@ class NumberParser {
   }
 }
 
-export default NumberParser;
+export default IntegerParser;

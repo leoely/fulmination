@@ -41,6 +41,11 @@ class Fulmination {
     }
   }
 
+  resetLocation() {
+    this.line = 0;
+    this.position = 1;
+  }
+
   showErrorLocation(text, error) {
     const highLight = new HighLight();
     highLight.addLexer(FulminationLexer);
@@ -225,6 +230,7 @@ class Fulmination {
     this.end = end;
     const results = this.dealText(text, this.dealChar.bind(this));
     delete this.end;
+    this.resetLocation();
     const {
       options: {
         debug,
@@ -240,6 +246,7 @@ class Fulmination {
 
   scanEscape(text, keep) {
     const results = this.dealTextEscape(text, this.dealCharEscape.bind(this));
+    this.resetLocation();
     const {
       options: {
         debug,
@@ -295,9 +302,10 @@ class Fulmination {
                 case '&':
                 case ':':
                 case ';':
-                case '':
                 case ')':
                 case ']':
+                case '"':
+                case '*':
                 case '\n':
                   this.position += 1;
                   break;
@@ -363,6 +371,98 @@ class Fulmination {
     }
   }
 
+  dealEscapeHeadAndJump(char, directStatus, bothStatus, intStatus) {
+    switch (char) {
+      case '(':
+      case ')':
+      case '[':
+      case ']':
+      case '+':
+      case ':':
+      case ';':
+      case '&':
+      case '"':
+      case '*':
+        this.escapeAndJump(char, directStatus);
+        break;
+      default: {
+        if (char === 'b') {
+          this.keep = true;
+          this.head = true;
+          this.status = bothStatus;
+        } else if (isDecimal(char)) {
+          const { integerParser, } = this;
+          integerParser.resetInteger();
+          integerParser.dealChar(char);
+          this.keep = true;
+          this.status = intStatus;
+        } else {
+          throw new Error('[Error] Escape character format error. ');
+        }
+      }
+    }
+  }
+
+  dealEscapeBothAndJump(char, status) {
+    switch (char) {
+      case ' ': {
+        const { head, } = this;
+        if (head !== true) {
+          this.chars.push(char);
+        }
+        break;
+      }
+      case '"':
+        this.status = status;
+        delete this.keep;
+        delete this.head;
+        break;
+      default:
+        this.head = false;
+        this.chars.push(char);
+    }
+  }
+
+  dealIntegerAndJump(char, status) {
+    if (isDecimal(char)) {
+      const { integerParser, } = this;
+      integerParser.dealChar(char);
+    } else {
+      const { integerParser, } = this;
+      this.step = integerParser.getInteger();
+      this.keep = true;
+      this.head = true;
+      if (char !== ' ') {
+        this.chars.push(char);
+        this.head = false;
+      }
+      this.status = status;
+    }
+  }
+
+  dealStepAndJump(char, status) {
+    const { step, } = this;
+    if (step === 1) {
+      this.status = status;
+      delete this.keep;
+      delete this.head;
+    } else {
+      this.step -= 1;
+    }
+    switch (char) {
+      case ' ': {
+        const { head, } = this;
+        if (head !== true) {
+          this.chars.push(char);
+        }
+        break;
+      }
+      default:
+        this.head = false;
+        this.chars.push(char);
+    }
+  }
+
   dealChar(char) {
     const { status, } = this;
     switch (status) {
@@ -374,8 +474,12 @@ class Fulmination {
           case '[':
             this.status = 7;
             break;
-          case '':
+          case '': {
+            const { chalkParser, integerParser, } = this;
+            chalkParser.resetStyles();
+            integerParser.resetInteger();
             break;
+          }
           default:
             throw new Error('[Error] This should a "(" or "[".');
         }
@@ -462,43 +566,10 @@ class Fulmination {
         }
         break;
       case 5:
-        switch (char) {
-          case '(':
-          case ')':
-          case '[':
-          case ']':
-          case '+':
-          case ':':
-          case ';':
-          case '&':
-          case '"':
-          case '*':
-            this.escapeAndJump(char, 4);
-            break;
-          default: {
-            if (char === 'b') {
-              this.keep = true;
-              this.status = 6;
-            } else if (isDecimal(char)) {
-              const { integerParser, } = this;
-              integerParser.resetInteger();
-              integerParser.dealChar(char);
-              this.keep = true;
-              this.status = 13;
-            } else {
-              throw new Error('[Error] Escape character format error. ');
-            }
-          }
-        }
+        this.dealEscapeHeadAndJump(char, 4, 6, 13);
         break;
       case 6:
-        switch (char) {
-          case '"':
-            this.status = 4;
-            break;
-          default:
-            this.chars.push(char);
-        }
+        this.dealEscapeBothAndJump(char, 4);
         break;
       case 7:
         switch (char) {
@@ -569,6 +640,7 @@ class Fulmination {
           case '': {
             const { end, } = this;
             if (end !== true) {
+              const { chalkParser, integerParser, } = this;
               this.showPassagesAndJump(0);
               delete this.chars;
               delete this.passages;
@@ -594,48 +666,23 @@ class Fulmination {
         break;
       }
       case 11:
-        switch (char) {
-          case '(':
-          case ')':
-          case '[':
-          case ']':
-          case '+':
-          case ':':
-          case ';':
-          case '&':
-          case '"':
-          case '*':
-            this.escapeAndJump(char, 10);
-            break;
-          default:
-            this.keep = true;
-            this.dealOther(char);
-        }
+        this.dealEscapeHeadAndJump(char, 10, 12, 15);
         break;
       case 12:
+        this.dealEscapeBothAndJump(char, 10);
         break;
-      case 13: {
-        if (isDecimal(char)) {
-          const { integerParser, } = this;
-          integerParser.dealChar(char);
-        } else {
-          const { integerParser, } = this;
-          this.step = integerParser.getInteger();
-          this.chars.push(char);
-          this.status = 14;
-        }
+      case 13:
+        this.dealIntegerAndJump(char, 14);
         break;
-      }
-      case 14: {
-        const { step, } = this;
-        if (step === 1) {
-          this.status = 4;
-        } else {
-          this.step -= 1;
-        }
-        this.chars.push(char);
+      case 14:
+        this.dealStepAndJump(char, 4);
         break;
-      }
+      case 15:
+        this.dealIntegerAndJump(char, 16);
+        break;
+      case 16:
+        this.dealStepAndJump(char, 10);
+        break;
     }
   }
 }

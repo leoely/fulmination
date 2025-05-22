@@ -77,7 +77,21 @@ describe('[Class] Fulmination;', () => {
 
   test('Fulmination should be able to handle the transfer of text in sections.', () => {
     const fulmination = new Fulmination({ debug: true, });
-    expect(JSON.stringify(fulmination.scan('(+) bold: "8(+) dim: underline: test escape single line.'))).toMatch('[\"\\u001b[1m(+) dim: underline: test escape single line.\\u001b[22m\"]');
-    expect(JSON.stringify(fulmination.scan('(+) bold: "b(+) dim: underline:" test escape single line.'))).toMatch('[\"\\u001b[1m(+) dim: underline: test escape single line.\\u001b[22m\"]');
+    expect(JSON.stringify(fulmination.scan('(+) bold: "19 (+) dim: underline: * test escape single line.'))).toMatch('[\"\\u001b[1m(+) dim: underline: test escape single line.\\u001b[22m\"]');
+    expect(JSON.stringify(fulmination.scan('(+) bold: "b (+) dim: underline:" * test escape single line.'))).toMatch('[\"\\u001b[1m(+) dim: underline: test escape single line.\\u001b[22m\"]');
+  });
+
+  test('Fulmination should be able to handle paragraph text transfer.', () => {
+    const fulmination = new Fulmination({ debug: true, });
+    expect(JSON.stringify(fulmination.scan(`
+      [+] bold; red:
+      | "19 (+) dim; underline: * test the results of scaning escape,
+      |
+    `))).toMatch('[\"\\u001b[1m\\u001b[31m(+) dim; underline: test the results of scaning escape,\\u001b[39m\\u001b[22m\",\"\\n\",\"\",\"\\n\"]');
+    expect(JSON.stringify(fulmination.scan(`
+      [+] bold; red:
+      | "b (+) dim; underline:" * test the results of scaning escape,
+      |
+    `))).toMatch('[\"\\u001b[1m\\u001b[31m(+) dim; underline: test the results of scaning escape,\\u001b[39m\\u001b[22m\",\"\\n\",\"\",\"\\n\"]');
   });
 });

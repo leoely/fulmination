@@ -1,8 +1,17 @@
-import Fulmination from '~/class/Fulmination';
+//import Fulmination from '~/class/Fulmination';
 
-const fulmination = new Fulmination();
+//const fulmination = new Fulmination();
+
 //fulmination.scan(`
   //*+) green; bold: * == (+) bold: * Cluster (+) bold; dim: * display structure. &
   //(+) green; bold: ** └─ (+) : * | (+) : *
 //`);
-fulmination.scan('(+) dim; underline: test the result of scanning.');
+//fulmination.scan(`
+  //[+] bold; red:
+  //| "b(+) dim; underline:"   test the results of scaning escape,
+  //|
+//`);
+
+import help from '~/lib/command/minify/main';
+
+help();

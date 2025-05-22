@@ -8,5 +8,5 @@ export default async function parse(...param) {
   const filePath = path.resolve('.', file);
   const string = fs.readFileSync(filePath).toString();
   const fulmination = new Fulmination();
-  fulmination().scan(string);
+  fulmination.scan(string);
 }

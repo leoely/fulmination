@@ -2739,6 +2739,17 @@ fulmination@^1.0.6:
     gulp "^4.0.2"
     mien "^0.1.7"
 
+fulmination@^1.1.3:
+  version "1.1.3"
+  resolved "https://registry.yarnpkg.com/fulmination/-/fulmination-1.1.3.tgz#5c0507e2c4f05f8e63212bc940f0924bac5ab24e"
+  integrity sha512-/kfgxOxM3iqk+ZkOyFXAYircgNl/mGnAcE+QwbPBzDF+MNpiuR2v97heYyxiUtaGSAmbW9lru6/F7NRDNbsbsA==
+  dependencies:
+    chalk "^2.4.2"
+    fulmination "^1.0.6"
+    glow.js "^0.0.34"
+    gulp "^4.0.2"
+    mien "^0.1.11"
+
 function-bind@^1.1.2:
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/function-bind/-/function-bind-1.1.2.tgz#2c02d864d97f3ea6c8830c464cbd11ab6eab7a1c"
@@ -3950,11 +3961,11 @@ micromatch@^4.0.4:
     picomatch "^2.3.1"
 
 mien@^0.1.11:
-  version "0.1.11"
-  resolved "https://registry.yarnpkg.com/mien/-/mien-0.1.11.tgz#7a52a26c0c1f69029d4df6e9d4cdb68aaa75bc29"
-  integrity sha512-iAODIDogCMyvaN1d6XbEpRKZ29V3rBN1XCZywFMhFOyZLVCQ2KPyBqaRKSYQ/L8vSoNaP+MRSPoJkNCSKON2lg==
+  version "0.1.13"
+  resolved "https://registry.yarnpkg.com/mien/-/mien-0.1.13.tgz#0b6fe72063507303a9d23d33964f9d98ce10cb18"
+  integrity sha512-N5cNX6iQCeUDHmkMVwZG5WdtiERQaKCHtIvf4Q0aXJS7WFWDXvtglhPHTOSy4F9sR+3puVbVHkix43i4P8ybXg==
   dependencies:
-    chalk "2.4.2"
+    fulmination "^1.1.3"
 
 mien@^0.1.7:
   version "0.1.9"
@@ -3962,6 +3973,13 @@ mien@^0.1.7:
   integrity sha512-heGrJHqKjY+2kush6KDm1I4wtxqct+1vjPkyG2553JUEuD/UmeUic4OuZobT60z1FK65DZ+meENJEk1QRj83Ag==
   dependencies:
     chalk "2.4.2"
+
+mien@^1.0.15:
+  version "1.0.15"
+  resolved "https://registry.yarnpkg.com/mien/-/mien-1.0.15.tgz#e73e8d338a04260882c0ba809bc00849f441154f"
+  integrity sha512-oaGrDj/XOduGnSJUayHoJHr3airLA7r7dpjs5fGpoRBG0VFHbz4KPkZtm4r7ssCnSLQZdNw+wquF8bQTqheCsg==
+  dependencies:
+    fulmination "^1.1.3"
 
 mimic-fn@^2.1.0:
   version "2.1.0"

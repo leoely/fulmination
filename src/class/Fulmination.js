@@ -162,7 +162,7 @@ class Fulmination {
     if (asterisk === true && other !== true) {
       this.showText(this.chars.join(''), linebreak);
     } else {
-      this.showText(this.chars.join('').trimEnd(), linebreak);
+      this.showText(this.chars.join('').trimEnd().replace('*', ' '), linebreak);
     }
     this.status = status;
     this.cleanAsteriskAndOther();
@@ -173,7 +173,7 @@ class Fulmination {
     if (asterisk === true && other !== true) {
       passages.push(chars.join(''));
     } else {
-      passages.push(chars.join('').trimEnd());
+      passages.push(chars.join('').trimEnd().replaceAll('*', ' '));
     }
     passages.shift();
     this.showPassages();
@@ -190,34 +190,57 @@ class Fulmination {
   }
 
   dealAsterisk() {
+    const { asterisk, } = this;
+    if (asterisk !== true) {
+      const { chars, } = this;
+      for (let i = chars.length - 1; i >= 0; i -= 1) {
+        const char = chars[i];
+        if (char === ' ') {
+          chars[i] = undefined;
+        } else {
+          break;
+        }
+      }
+    }
     this.asterisk = true;
-    this.chars.push(' ');
+    const { other, } = this;
+    if (other === true) {
+      this.chars.push('*');
+    } else {
+      this.chars.push(' ');
+    }
   }
 
   dealOther(char) {
     this.other = true;
+    this.asterisk = false;
     this.chars.push(char);
   }
 
   dealSpace(char) {
-    if (this.handleSpace()) {
+    const { other, } = this;
+    if (other === true) {
       this.chars.push(char);
+    } else {
+      if (this.handleSpace()) {
+        this.chars.push(char);
+      }
     }
   }
 
-  generate(text, sustain, keep) {
+  generate(text, sustain, reserve) {
     this.generate = true;
     this.results = [];
-    const products = this.scan(text, sustain, keep);
+    const products = this.scan(text, sustain, reserve);
     delete this.generate;
     delete this.results;
     return products.join('');
   }
 
-  generateEscape(text, sustain, keep) {
+  generateEscape(text, sustain, reserve) {
     this.generate = true;
     this.results = [];
-    const products = this.scanEscape(text, keep);
+    const products = this.scanEscape(text, reserve);
     delete this.generate;
     delete this.results;
     return products.join('');
@@ -250,13 +273,23 @@ class Fulmination {
             throw new Error('[Error] parameter code can only the interval [0, 2]');
         }
       });
-      return this.results;
+      const {
+        options: {
+          debug,
+        },
+        generate,
+      } = this;
+      if (debug === true || generate === true){
+        const { results, } = this;
+        this.results = [];
+        return results;
+      }
     } else {
       throw new Error('[Error] Method scanAll parameters which should be a array type');
     }
   }
 
-  scan(text, sustain, keep) {
+  scan(text, sustain, reserve) {
     this.sustain = sustain;
     const results = this.dealText(text, this.dealChar.bind(this));
     delete this.sustain;
@@ -268,14 +301,15 @@ class Fulmination {
       generate,
     } = this;
     if (debug === true || generate === true){
-      if (keep !== true) {
+      if (reserve !== true) {
         this.results = [];
       }
       return results;
     }
   }
 
-  scanEscape(text, keep) {
+  scanEscape(text, reserve) {
+    this.first = true;
     const results = this.dealTextEscape(text, this.dealCharEscape.bind(this));
     this.resetLocation();
     const {
@@ -285,7 +319,7 @@ class Fulmination {
       generate,
     } = this;
     if (debug === true || generate === true) {
-      if (keep !== true) {
+      if (reserve !== true) {
         this.results = [];
       }
       return results;
@@ -390,12 +424,15 @@ class Fulmination {
           case 4: {
             const { linebreak, } = this;
             this.showTextAndJump(0, linebreak);
+            delete this.linebreak;
             delete this.chars;
+            delete this.first;
             break;
           }
           case 10:
             this.showPassagesAndJump(0);
             this.passages = [];
+            delete this.first;
             break;
         }
         break;
@@ -403,9 +440,9 @@ class Fulmination {
         this.first = true;
         const { passages, chars, asterisk, other, } = this;
         if (asterisk === true && other !== true) {
-         passages.push(chars.join(''));
+          passages.push(chars.join(''));
         } else {
-          passages.push(chars.join('').trimEnd());
+          passages.push(chars.join('').trimEnd().replaceAll('*', ' '));
         }
         this.chars = [];
         this.cleanAsteriskAndOther();
@@ -448,6 +485,7 @@ class Fulmination {
       case ';':
       case '&':
       case '"':
+      case '|':
       case '*':
         this.escapeAndJump(char, directStatus);
         break;
@@ -480,8 +518,9 @@ class Fulmination {
       }
       case '"':
         this.status = status;
-        delete this.keep;
         delete this.head;
+        this.keep = true;
+        this.other = true;
         break;
       default:
         this.head = false;
@@ -534,6 +573,9 @@ class Fulmination {
     switch (status) {
       case 0:
         switch (char) {
+          case ' ':
+            this.keep = false;
+            break;
           case '(':
             this.status = 1;
             break;
@@ -587,6 +629,7 @@ class Fulmination {
             this.status = 4;
             const { style, } = this;
             chalkParser.setStyles(style);
+            this.keep = false;
             break;
           }
           default: {
@@ -600,7 +643,7 @@ class Fulmination {
           case '': {
             const { sustain, } = this;
             if (sustain !== true) {
-              this.showText(this.chars.join(''));
+              this.showText(this.chars.join('').replaceAll('*', ' '));
               this.status = 0;
               this.cleanAsteriskAndOther();
               delete this.chars;
@@ -619,16 +662,22 @@ class Fulmination {
           case '&':
             this.showTextAndJump(0, true);
             this.chars =  [];
+            this.keep = false;
             break;
           case '*':
             this.dealAsterisk();
             break;
           case ' ':
             this.dealSpace(char);
-            this.keep = false;
+            this.keep = true;
             break;
           default:
-            this.dealOther(char);
+            if (char >= '0' && char <= '9') {
+              this.chars.push(char);
+              this.status = 17;
+            } else {
+              this.dealOther(char);
+            }
         }
         break;
       case 5:
@@ -686,12 +735,19 @@ class Fulmination {
         break;
       case 10: {
         switch (char) {
+          case ' ': {
+            const { other, } = this;
+            if (other === true) {
+              this.chars.push(char);
+            }
+            break;
+          }
           case '|': {
             const { passages, chars, asterisk, other, } = this;
             if (asterisk === true && other !== true) {
               passages.push(chars.join(''));
             } else {
-              passages.push(chars.join('').trimEnd());
+              passages.push(chars.join('').trimEnd().replaceAll('*', ' '));
             }
             this.chars = [];
             this.cleanAsteriskAndOther();
@@ -707,6 +763,8 @@ class Fulmination {
             const { sustain, } = this;
             if (sustain !== true) {
               const { chalkParser, integerParser, } = this;
+              chalkParser.resetStyles();
+              integerParser.resetInteger();
               this.showPassagesAndJump(0);
               delete this.chars;
               delete this.passages;
@@ -724,7 +782,7 @@ class Fulmination {
             break;
           case ' ':
             this.dealSpace(char);
-            this.keep = false;
+            this.keep = true;
             break;
           default:
             this.dealOther(char);
@@ -742,12 +800,63 @@ class Fulmination {
         break;
       case 14:
         this.dealStepAndJump(char, 4);
+        this.keep = true;
+        this.other = true;
         break;
       case 15:
         this.dealIntegerAndJump(char, 16);
         break;
       case 16:
         this.dealStepAndJump(char, 10);
+        this.keep = true;
+        this.other = true;
+        break;
+      case 17:
+        switch (char) {
+          case '&': {
+            const { chars, integerParser, } = this;
+            integerParser.resetInteger();
+            const { length, } = chars;
+            for (let i = length - 1; i >= 0; i -= 1) {
+              const char = chars[i];
+              if (char >= '0' && char <= '9') {
+                integerParser.dealChar(char);
+              } else {
+                chars.splice(i, (length - 1 - i + 1));
+                break;
+              }
+            }
+            const integer = integerParser.getInteger();
+            this.showText(this.chars.join('').trimEnd().replaceAll('*', ' '));
+            const {
+              options: {
+                debug,
+              },
+              generate,
+            } = this;
+            for (let i = 0; i < integer; i += 1) {
+              if (debug === true || generate === true) {
+                const { results, style, } = this;
+                results.push('\n');
+              } else {
+                console.log('');
+              }
+            }
+            this.status = 0;
+            this.chars =  [];
+            this.keep = false;
+            this.cleanAsteriskAndOther();
+            break;
+          }
+          default:
+            this.cleanAsteriskAndOther();
+            if (char >= '0' && char <= '9') {
+              this.chars.push(char);
+            } else {
+              this.chars.push(char)
+              this.status = 4;
+            }
+        }
         break;
     }
   }

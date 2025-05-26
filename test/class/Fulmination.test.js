@@ -94,4 +94,32 @@ describe('[Class] Fulmination;', () => {
       |
     `))).toMatch('[\"\\u001b[1m\\u001b[31m(+) dim; underline: test the results of scaning escape,\\u001b[39m\\u001b[22m\",\"\\n\",\"\",\"\\n\"]');
   });
+
+  test('Fulmination generation funciton should output the correct result.', () => {
+    const fulmination = new Fulmination();
+    expect(JSON.stringify(fulmination.generate('(+) bold: test generation function.'))).toMatch('\"\\u001b[1mtest generation function.\\u001b[22m\"');
+    expect(JSON.stringify(fulmination.generate(`
+      [+] bold; green:
+      | test function generate
+      | test function generate escape
+      | test function generate all
+    `))).toMatch('\"\\u001b[1m\\u001b[32mtest function generate\\u001b[39m\\u001b[22m\\n\\u001b[1m\\u001b[32mtest function generate escape\\u001b[39m\\u001b[22m\\n\\u001b[1m\\u001b[32mtest function generate all\\u001b[39m\\u001b[22m\\n\"');
+    fulmination.scan('(+) bold:', true);
+    expect(JSON.stringify(fulmination.generateEscape('test "generation" function.'))).toMatch('\"\\u001b[1mtest \\\"generation\\\" function.\\u001b[22m\"');
+    fulmination.scan('[+] bold:', true);
+    expect(JSON.stringify(fulmination.generate(`
+      [+] bold; green:
+      | test function generate
+      | test function generate escape
+      | test function generate all
+    `))).toMatch('\"\\u001b[1m\\u001b[32mtest function generate\\u001b[39m\\u001b[22m\\n\\u001b[1m\\u001b[32mtest function generate escape\\u001b[39m\\u001b[22m\\n\\u001b[1m\\u001b[32mtest function generate all\\u001b[39m\\u001b[22m\\n\"');
+    expect(JSON.stringify(fulmination.generateAll([
+      [`
+        [+] bold; red:
+        |
+      `, 1],
+      ['(+) dim; underline: test the results of scaning escape.', 2],
+      ['(+) dim; underline: test the result of scaning.', 0],
+    ]))).toMatch('\"\\u001b[1m\\u001b[31m(+) dim; underline: test the results of scaning escape.\\u001b[39m\\u001b[22m\\n\\u001b[2m\\u001b[4mtest the result of scaning.\\u001b[24m\\u001b[22m\"');
+  });
 });

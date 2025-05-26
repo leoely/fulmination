@@ -83,8 +83,8 @@ class Fulmination {
   }
 
   cleanAsteriskAndOther() {
-    this.asterisk = false;
-    this.other = false;
+    delete this.asterisk;
+    delete this.other;
   }
 
   handleSpace() {
@@ -106,8 +106,9 @@ class Fulmination {
         options: {
           debug,
         },
+        generate,
       } = this;
-      if (debug === true) {
+      if (debug === true || generate === true) {
         const { results, style, } = this;
         results.push(style(text));
         results.push('\n');
@@ -120,8 +121,9 @@ class Fulmination {
         options: {
           debug,
         },
+        generate,
       } = this;
-      if (debug === true) {
+      if (debug === true || generate === true) {
         const { results, style, } = this;
         results.push(style(text));
       } else {
@@ -139,8 +141,9 @@ class Fulmination {
           options: {
             debug,
           },
+          generate,
         } = this;
-        if (debug === true) {
+        if (debug === true || generate === true) {
           const { style, } = this;
           this.results.push(style(passage));
           this.results.push('\n');
@@ -202,6 +205,33 @@ class Fulmination {
     }
   }
 
+  generate(text, sustain, keep) {
+    this.generate = true;
+    this.results = [];
+    const products = this.scan(text, sustain, keep);
+    delete this.generate;
+    delete this.results;
+    return products.join('');
+  }
+
+  generateEscape(text, sustain, keep) {
+    this.generate = true;
+    this.results = [];
+    const products = this.scanEscape(text, keep);
+    delete this.generate;
+    delete this.results;
+    return products.join('');
+  }
+
+  generateAll(array) {
+    this.generate = true;
+    this.results = [];
+    const products = this.scanAll(array);
+    delete this.generate;
+    delete this.results;
+    return products.join('');
+  }
+
   scanAll(array) {
     if (Array.isArray(array)) {
       array.map((elem) => {
@@ -226,17 +256,18 @@ class Fulmination {
     }
   }
 
-  scan(text, end, keep) {
-    this.end = end;
+  scan(text, sustain, keep) {
+    this.sustain = sustain;
     const results = this.dealText(text, this.dealChar.bind(this));
-    delete this.end;
+    delete this.sustain;
     this.resetLocation();
     const {
       options: {
         debug,
       },
+      generate,
     } = this;
-    if (debug === true){
+    if (debug === true || generate === true){
       if (keep !== true) {
         this.results = [];
       }
@@ -251,8 +282,9 @@ class Fulmination {
       options: {
         debug,
       },
+      generate,
     } = this;
-    if (debug === true) {
+    if (debug === true || generate === true) {
       if (keep !== true) {
         this.results = [];
       }
@@ -281,8 +313,9 @@ class Fulmination {
       options: {
         debug,
       },
+      generate,
     } = this;
-    if (debug === true) {
+    if (debug === true || generate === true) {
       return this.results;
     }
   }
@@ -335,8 +368,9 @@ class Fulmination {
       options: {
         debug,
       },
+      generate,
     } = this;
-    if (debug === true) {
+    if (debug === true || generate === true) {
       return this.results;
     }
   }
@@ -350,24 +384,56 @@ class Fulmination {
       default:
         throw new Error('[Error] Escape scan must be in status 4 and 10.');
     }
-    this.other = true;
     switch (char) {
       case '':
         switch (status) {
-          case 4:
-            this.showText(this.chars.join(''));
-            this.cleanAsteriskAndOther();
-            this.status = 0;
-            this.chars = [];
+          case 4: {
+            const { linebreak, } = this;
+            this.showTextAndJump(0, linebreak);
+            delete this.chars;
             break;
+          }
           case 10:
-            this.showPassagesAndJump();
+            this.showPassagesAndJump(0);
             this.passages = [];
             break;
         }
         break;
+      case '|': {
+        this.first = true;
+        const { passages, chars, asterisk, other, } = this;
+        if (asterisk === true && other !== true) {
+         passages.push(chars.join(''));
+        } else {
+          passages.push(chars.join('').trimEnd());
+        }
+        this.chars = [];
+        this.cleanAsteriskAndOther();
+        break;
+      }
+      case '*': {
+        this.asterisk = true;
+        this.chars.push(' ');
+        break;
+      }
+      case ' ': {
+        const { first, } = this;
+        if (first !== true) {
+          this.chars.push(char);
+        }
+        break;
+      }
+      case '&': {
+        const { status, } = this;
+        if (status !== 4) {
+          throw new Error('[Error] "&" can only appear in status 4.');
+        }
+        this.linebreak = true;
+        break;
+      }
       default:
-        this.chars.push(char);
+        this.first = false;
+        this.dealOther(char);
     }
   }
 
@@ -532,8 +598,8 @@ class Fulmination {
       case 4:
         switch (char) {
           case '': {
-            const { end, } = this;
-            if (end !== true) {
+            const { sustain, } = this;
+            if (sustain !== true) {
               this.showText(this.chars.join(''));
               this.status = 0;
               this.cleanAsteriskAndOther();
@@ -638,8 +704,8 @@ class Fulmination {
             this.showPassagesAndJump(1);
             break;
           case '': {
-            const { end, } = this;
-            if (end !== true) {
+            const { sustain, } = this;
+            if (sustain !== true) {
               const { chalkParser, integerParser, } = this;
               this.showPassagesAndJump(0);
               delete this.chars;

@@ -1,4 +1,3 @@
-import chalk from 'chalk';
 import Fulmination from '~/class/Fulmination';
 import { commandTip, } from 'mien';
 

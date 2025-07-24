@@ -20,6 +20,24 @@ function isDecimal(char) {
   return char >= '0' && char <= '9';
 }
 
+function replaceAllAsterisk(str) {
+  const chars = [];
+  let index;
+  outer: for (let i = str.length - 1; i >= 0; i -= 1) {
+    const char = str.charAt(i);
+    switch (char) {
+      case '*':
+      case ' ':
+        chars.push(' ');
+        break;
+      default:
+        index = i;
+        break outer;
+    }
+  }
+  return str.substring(0, index + 1) + chars.join('');
+}
+
 class Fulmination {
   constructor(options = {}) {
     const defaultOptions =  {
@@ -162,7 +180,7 @@ class Fulmination {
     if (asterisk === true && other !== true) {
       this.showText(this.chars.join(''), linebreak);
     } else {
-      this.showText(this.chars.join('').trimEnd().replace('*', ' '), linebreak);
+      this.showText(replaceAllAsterisk(this.chars.join('').trimEnd()), linebreak);
     }
     this.status = status;
     this.cleanAsteriskAndOther();
@@ -173,7 +191,7 @@ class Fulmination {
     if (asterisk === true && other !== true) {
       passages.push(chars.join(''));
     } else {
-      passages.push(chars.join('').trimEnd().replaceAll('*', ' '));
+      passages.push(replaceAllAsterisk(chars.join('').trimEnd()));
     }
     passages.shift();
     this.showPassages();
@@ -442,7 +460,7 @@ class Fulmination {
         if (asterisk === true && other !== true) {
           passages.push(chars.join(''));
         } else {
-          passages.push(chars.join('').trimEnd().replaceAll('*', ' '));
+          passages.push(replaceAllAsterisk(chars.join('').trimEnd()));
         }
         this.chars = [];
         this.cleanAsteriskAndOther();
@@ -643,7 +661,7 @@ class Fulmination {
           case '': {
             const { sustain, } = this;
             if (sustain !== true) {
-              this.showText(this.chars.join('').replaceAll('*', ' '));
+              this.showText(replaceAllAsterisk(this.chars.join('')));
               this.status = 0;
               this.cleanAsteriskAndOther();
               delete this.chars;

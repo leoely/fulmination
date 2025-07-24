@@ -12,10 +12,10 @@ describe('[Class] Fulmination;', () => {
     const fulmination = new Fulmination({ debug: true, });
     expect(JSON.stringify(fulmination.scan(`
       [+] bold; green:
-      | This is ctf passage syntax.
+      | This is fulmination passage syntax.
       | Each passage will in different line.
       | Each passage is start with delimiter.
-    `))).toMatch('[\"\\u001b[1m\\u001b[32mThis is ctf passage syntax.\\u001b[39m\\u001b[22m\",\"\\n\",\"\\u001b[1m\\u001b[32mEach passage will in different line.\\u001b[39m\\u001b[22m\",\"\\n\",\"\\u001b[1m\\u001b[32mEach passage is start with delimiter.\\u001b[39m\\u001b[22m\",\"\\n\"]');
+    `))).toMatch('[\"\\u001b[1m\\u001b[32mThis is fulmination passage syntax.\\u001b[39m\\u001b[22m\",\"\\n\",\"\\u001b[1m\\u001b[32mEach passage will in different line.\\u001b[39m\\u001b[22m\",\"\\n\",\"\\u001b[1m\\u001b[32mEach passage is start with delimiter.\\u001b[39m\\u001b[22m\",\"\\n\"]');
   });
 
   test('The result of fulmination parsing mixed text should be correct.', () => {
@@ -115,7 +115,6 @@ describe('[Class] Fulmination;', () => {
     `))).toMatch('[\"\\u001b[1m\\u001b[4mnode -v # Should print \\\"v22.16.0\\\".\\u001b[24m\\u001b[22m\",\"\\n\",\"\\u001b[1m\\u001b[4mnvm current # Should print \\\"v22.16.0\\\".\\u001b[24m\\u001b[22m\",\"\\n\"]');
   });
 
-
   test('Fulmination should be able to handle the transfer of text in sections.', () => {
     const fulmination = new Fulmination({ debug: true, });
     expect(JSON.stringify(fulmination.scan('(+) bold: "19 (+) dim: underline: test escape single line.'))).toMatch('[\"\\u001b[1m(+) dim: underline: test escape single line.\\u001b[22m\"]');
@@ -167,5 +166,15 @@ describe('[Class] Fulmination;', () => {
       ['(+) dim; underline: test the results of scaning escape.', 2],
       ['(+) dim; underline: test the result of scaning.', 0],
     ]))).toMatch('\"\\u001b[1m\\u001b[31m(+) dim; underline: test the results of scaning escape.\\u001b[39m\\u001b[22m\\n\\u001b[2m\\u001b[4mtest the result of scaning.\\u001b[24m\\u001b[22m\"');
+  });
+
+  test('Fulminatin should be able to handle multiple asterisk correctly.', () => {
+    const fulmination = new Fulmination({ debug: true, });
+    expect(JSON.stringify(fulmination.scan('(+) green; bold: test multiple asterisk ** (+): test multiple asterisk'))).toMatch('[\"\\u001b[32m\\u001b[1mtest multiple asterisk  \\u001b[22m\\u001b[39m\",\"test multiple asterisk\"]');
+  });
+
+  test('Fulminatin should be able to correctly escape asterisks..', () => {
+    const fulmination = new Fulmination({ debug: true, });
+    expect(JSON.stringify(fulmination.scan('(+) bold: SELECT "* FROM users;'))).toMatch('[\"\\u001b[1mSELECT * FROM users;\\u001b[22m\"]');
   });
 });

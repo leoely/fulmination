@@ -1,6 +1,5 @@
 import path from 'path';
 import fs from 'fs';
-import chalk from 'chalk';
 import Fulmination from '~/class/fulmination';
 
 export default async function parse(...param) {

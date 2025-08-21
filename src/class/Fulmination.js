@@ -798,10 +798,6 @@ class Fulmination {
           case '*':
             this.dealAsterisk();
             break;
-          case ' ':
-            this.dealSpace(char);
-            this.keep = true;
-            break;
           default:
             this.dealOther(char);
         }

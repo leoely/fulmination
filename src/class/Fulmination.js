@@ -1043,8 +1043,8 @@ class Fulmination {
             if (char >= '0' && char <= '9') {
               this.chars.push(char);
             } else {
-              this.chars.push(char)
               this.status = 4;
+              this.dealChar(char);
             }
         }
         break;

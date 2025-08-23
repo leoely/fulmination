@@ -135,6 +135,7 @@ describe('[Class] Fulmination;', () => {
   test('Fulmination should be able to handle multiple line breaks on a single line.', () => {
     const fulmination = new Fulmination({ debug: true, });
     expect(JSON.stringify(fulmination.scan('(+) red; bold: test multiple carriage retrun on a single line. 2&'))).toMatch('[\"\\u001b[31m\\u001b[1mtest multiple carriage retrun on a single line.\\u001b[22m\\u001b[39m\",\"\\n\",\"\\n\"]');
+    expect(JSON.stringify(fulmination.scan('(+) red; bold: there are numbers such as 1 that require extra attention. 2&'))).toMatch('[\"\\u001b[31m\\u001b[1mthere are numbers such as 1 that require extra attention.\\u001b[22m\\u001b[39m\",\"\\n\",\"\\n\"]');
   });
 
   test('Fulmination should be able to handle paragraph text transfer.', () => {

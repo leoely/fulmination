@@ -111,6 +111,8 @@ class ChalkParser {
           case 'u':
             this.status = 94;
             break;
+          default:
+            throw new Error('[Error] Name resolution error.');
         }
         break;
       }

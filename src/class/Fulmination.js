@@ -70,6 +70,17 @@ class Fulmination {
     const fulmination = new Fulmination1();
     const lines = text.split('\n');
     const { line, position, } = this;
+    const prevLineIndex = line - 1;
+    if (prevLineIndex >= 0) {
+      const prevLine = lines[prevLineIndex];
+      if (prevLine !== undefined) {
+        const hl = highLight.parse(prevLine).map((token) => fulminationTmpl(token)).join('');
+        fulmination.scanAll([
+          ['(+) gray: * ' + (prevLineIndex) + '(+): * (+) black; bgWhite: ', 1],
+          [hl, 2],
+        ]);
+      }
+    }
     fulmination.scanAll([
       ['(+): * & (+): * (+) gray: ' + line + '(+): * (+) black; bgWhite: ', 1],
       [lines[line], 2],

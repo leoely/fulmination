@@ -2,7 +2,6 @@ import Fulmination from '~/class/Fulmination';
 
 const fulmination = new Fulmination();
 fulmination.scan(`
-  [+] bold:
-  | the display will be the same
-  [+] bold:|the display will be the same
+  (+) cyan: there are three line breaks here "" 3&
+  (+) [cyan: there are three line breaks here 3&
 `);

@@ -112,7 +112,12 @@ class ChalkParser {
             this.status = 94;
             break;
           default:
-            throw new Error('[Error] Name resolution error.');
+            switch (char) {
+              case ' ':
+                break;
+              default:
+              throw new Error('[Error] Name resolution error.');
+            }
         }
         break;
       }

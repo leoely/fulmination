@@ -11,12 +11,12 @@ describe('[Class] Fulmination;', () => {
   test('Compression will not affect the display results', () => {
     const fulmination = new Fulmination({ debug: true, });
     expect(JSON.stringify(fulmination.scan(`
-      [+] bold:green:
+      [+] bold; green:
       | compression will not affect the display results.
-    `))).toMatch('[\"\\u001b[1mcompression will not affect the display results.\\u001b[22m\",\"\\n\"]');
+    `))).toMatch('[\"\\u001b[1m\\u001b[32mcompression will not affect the display results.\\u001b[39m\\u001b[22m\",\"\\n\"]');
     expect(JSON.stringify(fulmination.scan(`
-      [+]bold:green:|compression will not affect the display results.
-    `))).toMatch('[\"\\u001b[1mcompression will not affect the display results.\\u001b[22m\",\"\\n\"]');
+      [+]bold;green:|compression will not affect the display results.
+    `))).toMatch('[\"\\u001b[1m\\u001b[32mcompression will not affect the display results.\\u001b[39m\\u001b[22m\",\"\\n\"]');
   });
 
   test('The result of fulmination parsing multiple paragraphs of text should be correct.', () => {

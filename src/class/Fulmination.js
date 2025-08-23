@@ -1,10 +1,28 @@
-import { HighLight, FulminationLexer, } from 'glow.js';
+import {
+  HighLight,
+  FulminationLexer,
+} from 'glow.js';
 import Fulmination1 from 'fulmination';
 import ChalkParser from '~/class/ChalkParser';
 import IntegerParser from '~/class/IntegerParser';
 import fulminationTmpl from '~/lib/template/fulminationTmpl';
 
+function validateChar(char) {
+  if (char !== '') {
+    if (char.length !== 1) {
+      throw new Error('[Error] The parameter char should be character type.');
+    }
+  } else {
+    if (char.length !== 0) {
+      throw new Error('[Error] The parameter char should be character type.');
+    }
+  }
+}
+
 function getWidth(length) {
+  if (!Number.isInteger(length)) {
+    throw new Error('[Error] The parameter length should be an integer type.');
+  }
   let ans = 1;
   while (true) {
     length /= 10;
@@ -17,10 +35,17 @@ function getWidth(length) {
 }
 
 function isDecimal(char) {
+  if (typeof char !== 'string') {
+    throw new Error('[Error] The parameter char should be a string type.');
+  }
+  validateChar(char);
   return char >= '0' && char <= '9';
 }
 
 function replaceAllAsterisk(str) {
+  if (typeof str !== 'string') {
+    throw new Error('[Error] The parameter str should be a string type.');
+  }
   const chars = [];
   let index;
   outer: for (let i = str.length - 1; i >= 0; i -= 1) {
@@ -44,6 +69,7 @@ class Fulmination {
       debug: false,
     };
     this.options = Object.assign(defaultOptions, options);
+    this.dealOptions();
     this.line = 0;
     this.position = 1;
     this.status = 0;
@@ -59,12 +85,31 @@ class Fulmination {
     }
   }
 
+  dealOptions() {
+    const {
+      options: {
+        debug,
+      },
+    } = this;
+    if (debug !== undefined) {
+      if (typeof debug !== 'boolean') {
+        throw new Error('[Error] The parameter debug should be of boolean type.')
+      }
+    }
+  }
+
   resetLocation() {
     this.line = 0;
     this.position = 1;
   }
 
   showErrorLocation(text, error) {
+    if (typeof text !== 'string') {
+      throw new Error('[Error] The parameter text should be a string type.');
+    }
+    if (!(error instanceof Error)) {
+      throw new Error('[Error] The parameter error should be of error type.');
+    }
     const highLight = new HighLight();
     highLight.addLexer(FulminationLexer);
     const fulmination = new Fulmination1();
@@ -76,7 +121,7 @@ class Fulmination {
       if (prevLine !== undefined) {
         const hl = highLight.parse(prevLine).map((token) => fulminationTmpl(token)).join('');
         fulmination.scanAll([
-          ['(+) gray: * ' + (prevLineIndex) + '(+): * (+) black; bgWhite: ', 1],
+          ['(+) gray: * ' + prevLineIndex + '(+): * (+) black; bgWhite: ', 1],
           [hl, 2],
         ]);
       }
@@ -98,7 +143,7 @@ class Fulmination {
     if (nextLine !== undefined) {
       const hl = highLight.parse(nextLine).map((token) => fulminationTmpl(token)).join('');
       fulmination.scanAll([
-        ['(+) gray: * ' + (nextLineIndex) + '(+): * (+) black; bgWhite: ', 1],
+        ['(+) gray: * ' + nextLineIndex + '(+): * (+) black; bgWhite: ', 1],
         [hl, 2],
         ['(+): &', 0],
       ]);
@@ -130,6 +175,14 @@ class Fulmination {
   }
 
   showText(text, linebreak) {
+    if (typeof text !== 'string') {
+      throw new Error('[Error] The parameter text should be a string type.');
+    }
+    if (linebreak !== undefined) {
+      if (typeof linebreak !== 'boolean') {
+        throw new Error('[Error] The parameter linebreak should be of boolean type.');
+      }
+    }
     if (linebreak === true) {
       const {
         options: {
@@ -187,6 +240,14 @@ class Fulmination {
   }
 
   showTextAndJump(status, linebreak) {
+    if (!Number.isInteger(status)) {
+      throw new Error('[Error] The parameter status should be an integer type.');
+    }
+    if (linebreak !== undefined) {
+      if (typeof linebreak !== 'boolean') {
+        throw new Error('[Error] The parameter linebreak should be of boolean type.');
+      }
+    }
     const { asterisk, other, } = this;
     if (asterisk === true && other !== true) {
       this.showText(this.chars.join(''), linebreak);
@@ -198,6 +259,9 @@ class Fulmination {
   }
 
   showPassagesAndJump(status) {
+    if (!Number.isInteger(status)) {
+      throw new Error('[Error] The parameter status should be an integer type.');
+    }
     const { passages, chars, asterisk, other, } = this;
     if (asterisk === true && other !== true) {
       passages.push(chars.join(''));
@@ -213,6 +277,13 @@ class Fulmination {
   }
 
   escapeAndJump(char, status) {
+    if (typeof char !== 'string') {
+      throw new Error('[Error] The parameter char should be a string type.');
+    }
+    validateChar(char);
+    if (!Number.isInteger(status)) {
+      throw new Error('[Error] The parameter status should be an integer type.');
+    }
     this.keep = true;
     this.dealOther(char);
     this.status = status;
@@ -241,12 +312,20 @@ class Fulmination {
   }
 
   dealOther(char) {
+    if (typeof char !== 'string') {
+      throw new Error('[Error] The parameter char should be a string type.');
+    }
+    validateChar(char);
     this.other = true;
     this.asterisk = false;
     this.chars.push(char);
   }
 
   dealSpace(char) {
+    if (typeof char !== 'string') {
+      throw new Error('[Error] The parameter char should be a string type.');
+    }
+    validateChar(char);
     const { other, } = this;
     if (other === true) {
       this.chars.push(char);
@@ -258,6 +337,19 @@ class Fulmination {
   }
 
   generate(text, sustain, reserve) {
+    if (typeof text !== 'string') {
+      throw new Error('[Error] The parameter text should be a string type.');
+    }
+    if (sustain !== undefined) {
+      if (typeof sustain !== 'boolean') {
+        throw new Error('[Error] The parameter sustain should be of boolean type.');
+      }
+    }
+    if (reserve !== undefined) {
+      if (typeof reserve !== 'boolean') {
+        throw new Error('[Error] The parameter reserve should be of boolean type.');
+      }
+    }
     this.generate = true;
     this.results = [];
     const products = this.scan(text, sustain, reserve);
@@ -267,6 +359,19 @@ class Fulmination {
   }
 
   generateEscape(text, sustain, reserve) {
+    if (typeof text !== 'string') {
+      throw new Error('[Error] The parameter text should be a string type.');
+    }
+    if (sustain !== undefined) {
+      if (typeof sustain !== 'boolean') {
+        throw new Error('[Error] The parameter sustain should be of boolean type.');
+      }
+    }
+    if (reserve !== undefined) {
+      if (typeof reserve !== 'boolean') {
+        throw new Error('[Error] The parameter reserve should be of boolean type.');
+      }
+    }
     this.generate = true;
     this.results = [];
     const products = this.scanEscape(text, reserve);
@@ -276,6 +381,9 @@ class Fulmination {
   }
 
   generateAll(array) {
+    if (!Array.isArray(array)) {
+      throw new Error('[Error] The parameter should be an array type.')
+    }
     this.generate = true;
     this.results = [];
     const products = this.scanAll(array);
@@ -285,6 +393,9 @@ class Fulmination {
   }
 
   scanAll(array) {
+    if (!Array.isArray(array)) {
+      throw new Error('[Error] The parameter should be an array type.')
+    }
     if (Array.isArray(array)) {
       array.map((elem) => {
         const [text, code] = elem;
@@ -319,6 +430,19 @@ class Fulmination {
   }
 
   scan(text, sustain, reserve) {
+    if (typeof text !== 'string') {
+      throw new Error('[Error] The parameter text should be a string type.');
+    }
+    if (sustain !== undefined) {
+      if (typeof sustain !== 'boolean') {
+        throw new Error('[Error] The parameter sustain should be of boolean type.');
+      }
+    }
+    if (reserve !== undefined) {
+      if (typeof reserve !== 'boolean') {
+        throw new Error('[Error] The parameter reserve should be of boolean type.');
+      }
+    }
     this.sustain = sustain;
     const results = this.dealText(text, this.dealChar.bind(this));
     delete this.sustain;
@@ -338,6 +462,14 @@ class Fulmination {
   }
 
   scanEscape(text, reserve) {
+    if (typeof text !== 'string') {
+      throw new Error('[Error] The parameter text should be a string type.');
+    }
+    if (reserve !== undefined) {
+      if (typeof reserve !== 'boolean') {
+        throw new Error('[Error] The parameter reserve should be of boolean type.');
+      }
+    }
     this.first = true;
     const results = this.dealTextEscape(text, this.dealCharEscape.bind(this));
     this.resetLocation();
@@ -384,6 +516,12 @@ class Fulmination {
   }
 
   dealText(text, dealMethod) {
+    if (typeof text !== 'string') {
+      throw new Error('[Error] The parameter text should be a string');
+    }
+    if (typeof dealMethod !== 'function') {
+      throw new Error('[Error] The parameter text should be a function type.');
+    }
     try {
       for (let i = 0; i <= text.length; i += 1) {
         const char = text.charAt(i);
@@ -439,6 +577,10 @@ class Fulmination {
   }
 
   dealCharEscape(char) {
+    if (typeof char !== 'string') {
+      throw new Error('[Error] The parameter char should be a string type.');
+    }
+    validateChar(char);
     const { status, } = this;
     switch (status) {
       case 4:
@@ -504,6 +646,16 @@ class Fulmination {
   }
 
   dealEscapeHeadAndJump(char, directStatus, bothStatus, intStatus) {
+    validateChar(char);
+    if (!Number.isInteger(directStatus)) {
+      throw new Error('[Error] The parameter directStatus should be an integer type.')
+    }
+    if (!Number.isInteger(bothStatus)) {
+      throw new Error('[Error] The parameter bothStatus should be an integer type.')
+    }
+    if (!Number.isInteger(intStatus)) {
+      throw new Error('[Error] The parameter initStaus should be an integer type.')
+    }
     switch (char) {
       case '(':
       case ')':
@@ -537,6 +689,10 @@ class Fulmination {
   }
 
   dealEscapeBothAndJump(char, status) {
+    validateChar(char);
+    if (!Number.isInteger(status)) {
+      throw new Error('[Error] The parameter status should be an integer type.')
+    }
     switch (char) {
       case ' ': {
         const { head, } = this;
@@ -558,6 +714,10 @@ class Fulmination {
   }
 
   dealIntegerAndJump(char, status) {
+    validateChar(char);
+    if (!Number.isInteger(status)) {
+      throw new Error('[Error] The parameter status should be an integer type.')
+    }
     if (isDecimal(char)) {
       const { integerParser, } = this;
       integerParser.dealChar(char);
@@ -575,6 +735,10 @@ class Fulmination {
   }
 
   dealStepAndJump(char, status) {
+    validateChar(char);
+    if (!Number.isInteger(status)) {
+      throw new Error('[Error] The parameter status should be an integer type.')
+    }
     const { step, } = this;
     if (step === 1) {
       this.status = status;
@@ -598,6 +762,7 @@ class Fulmination {
   }
 
   dealChar(char) {
+    validateChar(char);
     const { status, } = this;
     switch (status) {
       case 0:

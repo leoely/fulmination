@@ -130,6 +130,7 @@ describe('[Class] Fulmination;', () => {
     const fulmination = new Fulmination({ debug: true, });
     expect(JSON.stringify(fulmination.scan('(+) bold: "19 (+) dim: underline: test escape single line.'))).toMatch('[\"\\u001b[1m(+) dim: underline: test escape single line.\\u001b[22m\"]');
     expect(JSON.stringify(fulmination.scan('(+) bold: "b (+) dim: underline:" test escape single line.'))).toMatch('[\"\\u001b[1m(+) dim: underline: test escape single line.\\u001b[22m\"]');
+    expect(JSON.stringify(fulmination.scan('(+) bold: "b (+) dim: underline: " test escape single line.'))).toMatch('[\"\\u001b[1m(+) dim: underline: test escape single line.\\u001b[22m\"]');
   });
 
   test('Fulmination should be able to handle multiple line breaks on a single line.', () => {

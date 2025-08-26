@@ -701,12 +701,22 @@ class Fulmination {
         }
         break;
       }
-      case '"':
+      case '"': {
+        const { chars, } = this;
+        for (let i = chars.length - 1; i >= 0; i -= 1) {
+          const char = chars[i];
+          if (char === ' ') {
+            chars.pop();
+          } else {
+            break;
+          }
+        }
         this.status = status;
         delete this.head;
         this.keep = true;
         this.other = true;
         break;
+      }
       default:
         this.head = false;
         this.chars.push(char);

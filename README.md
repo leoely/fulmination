@@ -1,6 +1,6 @@
 # Fulmination
 
-## Why use fulmination
+## Why use fulmination?
 
 | Brief | Details |
 | --- | --- |
@@ -8,11 +8,14 @@
 | Semantic  | The semantic syntax is easier to read and is suitable for long-term development project. |
 | Beautiful | Beautiful syntax provides a new way to adapt to complex projects.                        |
 
-## You will be able to
+## You will be able to.
 
+***Text type:***
 ```javascript
 fulmination.scan('(+) bold: hello fulmination text.');
 ```
+
+***Paragraph type:***
 ```javascript
 fulmination.scan(`
   [+] bold:
@@ -21,6 +24,8 @@ fulmination.scan(`
   | hello fulmination passage.
 `);
 ```
+
+***Complex situation:***
 ```javascript
 fulmination.scanAll([
   [`

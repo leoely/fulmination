@@ -36,4 +36,18 @@ fulmination.scanAll([
   ['(+) dim: This is the original text fulmination.', 0],
 ]);
 ```
+***Complex situation:***
+```javascript
+fulmination.generateAll([
+  ['(+) blue: when using multiple scan', 0],
+  ['(+) yellow: the syntax becomes redundant', 0],
+  ['(+) green: you can use scanAll', 0],
+])
+```
 ## Quick start
+
+## Get in touch
+
+If you find a bug or request a new feature,please contact the author.
+[leoely@gmail789@gmail.com](leoely@gmail789@gmail.com)
+

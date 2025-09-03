@@ -2,30 +2,11 @@
 
 ## Why use fulmination
 
-<table>
-<tr>
-<td>
-Refining
-</td>
-<td>
-Syntax refinement makes development more effecient and suitable for lager project.
-</td>
-</tr>
-<tr>
-<td>
-Semantic
-</td>
-<td>
-The semantic syntax is easier to read and is suitable for long-term development project.
-</td>
-</tr>
-<tr>
-<td>Beautiful</td>
-<td>
-Beautiful syntax provides a new way to adapt to complex projects
-</td>
-</tr>
-</table>
+| Brief | Details |
+| --- | --- |
+| Refining  | Syntax refinement makes development more effecient and suitable for lager project.       |
+| Semantic  | The semantic syntax is easier to read and is suitable for long-term development project. |
+| Beautiful | Beautiful syntax provides a new way to adapt to complex projects.                        |
 
 ## You will be able to
 

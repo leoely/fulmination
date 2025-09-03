@@ -10,20 +10,9 @@
 
 ## You will be able to
 
-<table>
-<tr>
-<td>Text</td>
-<td>
 ```javascript
 fulmination.scan('(+) bold: hello fulmination text.');
 ```
-</td>
-</tr>
-<tr>
-<td>
-  Paragraph
-</td>
-<td>
 ```javascript
 fulmination.scan(`
   [+] bold:
@@ -32,11 +21,6 @@ fulmination.scan(`
   | hello fulmination passage.
 `);
 ```
-</td>
-</tr>
-<tr>
-<td>Complex situation</td>
-<td>
 ```javascript
 fulmination.scanAll([
   [`
@@ -47,8 +31,4 @@ fulmination.scanAll([
   ['(+) dim: This is the original text fulmination.', 0],
 ]);
 ```
-</td>
-</tr>
-</table
-
 ## Quick start

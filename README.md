@@ -46,8 +46,29 @@ fulmination.generateAll([
 ```
 ## Quick start
 
+***Install fulmination using yarn:***
+```shell
+yarn add fulmination
+```
+
+***Install fulmination using pnpm:***
+```shell
+pnpm add fulmination
+```
+
+***Install fulmination using npm:***
+```shell
+npm install fulmination
+```
+
+***Using the syntax of fulmination:***
+```javascript
+import Fulmination from 'fulmination';
+
+const fulmination = new Fulmination();
+```
+
 ## Get in touch
 
-If you find a bug or request a new feature,please contact the author.
-[leoely@gmail789@gmail.com](leoely@gmail789@gmail.com)
-
+If you find a bug or request a new feature,or have better suggestions,please contact the author.
+[leoely@gmail789@gmail.com](mailto:leoely@gmail789@gmail.com)

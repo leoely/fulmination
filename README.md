@@ -9,7 +9,7 @@ Add styles and colors to terminal text programmatically in new ways.
 | ***Semantic***  | The semantic syntax is easier to read and is suitable for long-term development project. |
 | ***Beautiful*** | Beautiful syntax provides a new way to adapt to complex projects.                        |
 
-## You will be able to
+## You will be able to.
 
 ***Text type:***
 ```javascript

@@ -186,8 +186,20 @@ describe('[Class] Fulmination;', () => {
     expect(JSON.stringify(fulmination.scan('(+) green; bold: test multiple asterisk ** (+): test multiple asterisk'))).toMatch('[\"\\u001b[32m\\u001b[1mtest multiple asterisk  \\u001b[22m\\u001b[39m\",\"test multiple asterisk\"]');
   });
 
-  test('Fulminatin should be able to correctly escape asterisks..', () => {
+  test('Fulminatin should be able to correctly escape asterisks.', () => {
     const fulmination = new Fulmination({ debug: true, });
     expect(JSON.stringify(fulmination.scan('(+) bold: SELECT "* FROM users;'))).toMatch('[\"\\u001b[1mSELECT * FROM users;\\u001b[22m\"]');
+  });
+
+  test('Fulmination should be able to support the original situation', () => {
+    const fulmination = new Fulmination({ debug: true, });
+    expect(JSON.stringify(fulmination.scan(`
+      <+> dim:
+      Error: Things keep happening!
+      *** at /home/gbusey/file.js:525:2
+      *** at Frobnicator.refrobulate (/home/gbusey/business-logic.js:424:21)
+      *** at Actor.<anonymous> (/home/gbusey/actors.js:400:8)
+      *** at increaseSynergy (/home/gbusey/actors.js:701:6)
+    `))).toMatch('[\"\\u001b[2mError:Thingskeephappening!\\u001b[22m\\n\\u001b[2m   at/home/gbusey/file.js:525:2\\u001b[22m\\n\\u001b[2m   atFrobnicator.refrobulate(/home/gbusey/business-logic.js:424:21)\\u001b[22m\\n\\u001b[2m   atActor.<anonymous>(/home/gbusey/actors.js:400:8)\\u001b[22m\\n\\u001b[2m   atincreaseSynergy(/home/gbusey/actors.js:701:6)\\u001b[22m\\n\\u001b[2m\\u001b[22m\"]');
   });
 });

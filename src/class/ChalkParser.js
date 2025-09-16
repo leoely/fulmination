@@ -13,7 +13,7 @@ class ChalkParser {
       throw new Error('[Error] This position should be the character ' + target + '.');
     }
   }
-
+;
   getStyle(source, target, name) {
     const { style, } = this;
     if (source === target) {

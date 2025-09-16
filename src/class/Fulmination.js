@@ -239,6 +239,30 @@ class Fulmination {
     }
   }
 
+  showContent(content) {
+    const {
+      options: {
+        debug,
+      },
+      generate,
+    } = this;
+    if (debug === true || generate === true) {
+      const { results, style, } = this;
+      results.push(style(content));
+    } else {
+      const { style, } = this;
+      process.stdout.write(style(content));
+    }
+  }
+
+  showContentAndJump(status) {
+    if (!Number.isInteger(status)) {
+      throw new Error('[Error] The parameter status should be an integer type.');
+    }
+    this.showContent(this.chars.join(''));
+    this.status = status;
+  }
+
   showTextAndJump(status, linebreak) {
     if (!Number.isInteger(status)) {
       throw new Error('[Error] The parameter status should be an integer type.');
@@ -538,11 +562,17 @@ class Fulmination {
                 case ';':
                 case ')':
                 case ']':
+                case '>':
                 case '"':
                 case '*':
-                case '\n':
+                case '\n': {
+                  const { same, } = this;
+                  if (same === true) {
+                    dealMethod(char);
+                  }
                   this.position += 1;
                   break;
+                }
                 default:
                   dealMethod(char);
                   this.position += 1;
@@ -553,10 +583,15 @@ class Fulmination {
             }
             break;
           }
-          case '\n':
+          case '\n': {
+            const { same, } = this;
+            if (same === true) {
+              dealMethod(char);
+            }
             this.line += 1;
             this.position = 1;
             break;
+          }
           default:
             dealMethod(char);
             this.position += 1;
@@ -661,6 +696,8 @@ class Fulmination {
       case ')':
       case '[':
       case ']':
+      case '<':
+      case '>':
       case '+':
       case ':':
       case ';':
@@ -785,6 +822,9 @@ class Fulmination {
             break;
           case '[':
             this.status = 7;
+            break;
+          case '<':
+            this.status = 18;
             break;
           case '': {
             const { chalkParser, integerParser, } = this;
@@ -1056,6 +1096,79 @@ class Fulmination {
               this.status = 4;
               this.dealChar(char);
             }
+        }
+        break;
+      case 18:
+        switch (char) {
+          case '+':
+            this.status = 19;
+            break;
+          default:
+            throw new Error('[Error] This should be "+".');
+        }
+        break;
+      case 19:
+        switch (char) {
+          case '>':
+            this.chars = [];
+            this.status = 20;
+            break;
+          default:
+            throw new Error('[Error] This should be ">".');
+        }
+        break;
+      case 20:
+        switch (char) {
+          case ';': {
+            const { chalkParser, } = this;
+            this.style = chalkParser.getStyles();
+            const { style, } = this;
+            chalkParser.setStyles(style);
+            break;
+          }
+          case ':': {
+            const { chalkParser, } = this;
+            this.style = chalkParser.getStyles();
+            this.status = 21;
+            this.chars = [];
+            const { style, } = this;
+            chalkParser.setStyles(style);
+            break;
+          }
+          default: {
+            const { chalkParser, } = this;
+            chalkParser.dealChar(char);
+          }
+        }
+        break;
+      case 21:
+        switch (char) {
+          case ' ':
+          case '\n':
+            break;
+          case '*':
+            this.same = true;
+            this.chars.push('*');
+            this.status = 22;
+            break;
+          default:
+            this.same = true;
+            this.chars.push(char);
+            this.status = 22;
+        }
+        break;
+      case 22:
+        switch (char) {
+          case '':
+            this.showContentAndJump(0);
+            break;
+          case ' ':
+            break;
+          case '*':
+            this.chars.push(' ');
+            break;
+          default:
+            this.chars.push(char);
         }
         break;
     }

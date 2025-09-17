@@ -85,6 +85,31 @@ class Fulmination {
     }
   }
 
+  static processOriginalContent(content) {
+    const chars = [];
+    let flag = false;
+    for (let i = 0; i < content.length; i += 1) {
+      const char = content.charAt(i);
+      switch (char) {
+        case '\n':
+          flag = true;
+          chars.push(char);
+          break;
+        case ' ':
+          if (flag === true) {
+            chars.push('*');
+          } else {
+            chars.push(char);
+          }
+          break;
+        default:
+          flag = false;
+          chars.push(char);
+      }
+    }
+    return chars.join('');
+  }
+
   dealOptions() {
     const {
       options: {
@@ -260,6 +285,7 @@ class Fulmination {
       throw new Error('[Error] The parameter status should be an integer type.');
     }
     this.showContent(this.chars.join(''));
+    this.chars = [];
     this.status = status;
   }
 
@@ -1148,7 +1174,7 @@ class Fulmination {
             break;
           case '*':
             this.same = true;
-            this.chars.push('*');
+            this.chars.push(' ');
             this.status = 22;
             break;
           default:
@@ -1162,7 +1188,9 @@ class Fulmination {
           case '':
             this.showContentAndJump(0);
             break;
-          case ' ':
+          case '\n':
+            this.chars.push(char);
+            this.showContentAndJump(21);
             break;
           case '*':
             this.chars.push(' ');

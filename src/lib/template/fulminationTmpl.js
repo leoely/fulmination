@@ -23,6 +23,8 @@ export default function fulminationTmpl(e) {
       return chalk.rgb(47, 47, 47)(elem);
     case 'parenthese':
       return chalk.rgb(0, 123, 123)(elem);
+    case 'angleBracket':
+      return chalk.rgb(28, 123, 153)(elem);
     case 'plus':
       return chalk.rgb(70, 20, 255)(elem);
     case 'dividing':

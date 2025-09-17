@@ -200,6 +200,20 @@ describe('[Class] Fulmination;', () => {
       *** at Frobnicator.refrobulate (/home/gbusey/business-logic.js:424:21)
       *** at Actor.<anonymous> (/home/gbusey/actors.js:400:8)
       *** at increaseSynergy (/home/gbusey/actors.js:701:6)
-    `))).toMatch('[\"\\u001b[2mError:Thingskeephappening!\\u001b[22m\\n\\u001b[2m   at/home/gbusey/file.js:525:2\\u001b[22m\\n\\u001b[2m   atFrobnicator.refrobulate(/home/gbusey/business-logic.js:424:21)\\u001b[22m\\n\\u001b[2m   atActor.<anonymous>(/home/gbusey/actors.js:400:8)\\u001b[22m\\n\\u001b[2m   atincreaseSynergy(/home/gbusey/actors.js:701:6)\\u001b[22m\\n\\u001b[2m\\u001b[22m\"]');
+    `))).toMatch('[\"\\u001b[2mError: Things keep happening!\\u001b[22m\\n\\u001b[2m\\u001b[22m\",\"\\u001b[2m    at /home/gbusey/file.js:525:2\\u001b[22m\\n\\u001b[2m\\u001b[22m\",\"\\u001b[2m    at Frobnicator.refrobulate (/home/gbusey/business-logic.js:424:21)\\u001b[22m\\n\\u001b[2m\\u001b[22m\",\"\\u001b[2m    at Actor.<anonymous> (/home/gbusey/actors.js:400:8)\\u001b[22m\\n\\u001b[2m\\u001b[22m\",\"\\u001b[2m    at increaseSynergy (/home/gbusey/actors.js:701:6)\\u001b[22m\\n\\u001b[2m\\u001b[22m\"]');
+  });
+
+  test('Fulmination should be able to support the original situation', () => {
+    expect(Fulmination.processOriginalContent(`
+Error: Things keep happening!
+   at /home/gbusey/file.js:525:2
+   at Frobnicator.refrobulate (/home/gbusey/business-logic.js:424:21)
+   at Actor.<anonymous> (/home/gbusey/actors.js:400:8)
+   at increaseSynergy (/home/gbusey/actors.js:701:6)`)).toMatch(`
+Error: Things keep happening!
+***at /home/gbusey/file.js:525:2
+***at Frobnicator.refrobulate (/home/gbusey/business-logic.js:424:21)
+***at Actor.<anonymous> (/home/gbusey/actors.js:400:8)
+***at increaseSynergy (/home/gbusey/actors.js:701:6)`);
   });
 });

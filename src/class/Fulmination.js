@@ -1183,13 +1183,16 @@ class Fulmination {
         break;
       case 21:
         switch (char) {
+          case '':
+            this.showContentAndJump(0);
+            this.same = false;
+            break;
           case ' ':
           case '\n':
             break;
           case '*':
             this.same = true;
             this.chars.push(' ');
-            this.status = 22;
             break;
           default:
             this.same = true;
@@ -1199,9 +1202,6 @@ class Fulmination {
         break;
       case 22:
         switch (char) {
-          case '':
-            this.showContentAndJump(0);
-            break;
           case '\n':
             this.chars.push(char);
             this.showContentAndJump(21);

@@ -216,4 +216,19 @@ Error: Things keep happening!
 ***at Actor.<anonymous> (/home/gbusey/actors.js:400:8)
 ***at increaseSynergy (/home/gbusey/actors.js:701:6)`);
   });
+
+  test('Fulmination should be able to handle the problem of the middle asterisk', () => {
+    const fulmination = new Fulmination({ debug: true, });
+    expect(JSON.stringify(fulmination.scan('(+) dim: "*"****'))).toMatch('[\"\\u001b[2m**   \\u001b[22m\"]');
+    expect(JSON.stringify(fulmination.scan(`
+      [+] bold:
+      | "*"****
+    `))).toMatch('[\"\\u001b[1m**   \\u001b[22m\",\"\\n\"]');
+    expect(JSON.stringify(fulmination.scan(`
+      [+] bold:
+      | "* need to be escaped
+      | "" need to be escaped
+      | ect need to be escaped
+    `))).toMatch('[\"\\u001b[1m* need to be escaped\\u001b[22m\",\"\\n\",\"\\u001b[1m\\\" need to be escaped\\u001b[22m\",\"\\n\",\"\\u001b[1mect need to be escaped\\u001b[22m\",\"\\n\"]');
+  });
 });

@@ -42,27 +42,6 @@ function isDecimal(char) {
   return char >= '0' && char <= '9';
 }
 
-function replaceAllAsterisk(str) {
-  if (typeof str !== 'string') {
-    throw new Error('[Error] The parameter str should be a string type.');
-  }
-  const chars = [];
-  let index;
-  outer: for (let i = str.length - 1; i >= 0; i -= 1) {
-    const char = str.charAt(i);
-    switch (char) {
-      case '*':
-      case ' ':
-        chars.push(' ');
-        break;
-      default:
-        index = i;
-        break outer;
-    }
-  }
-  return str.substring(0, index + 1) + chars.join('');
-}
-
 class Fulmination {
   constructor(options = {}) {
     const defaultOptions =  {
@@ -73,6 +52,7 @@ class Fulmination {
     this.line = 0;
     this.position = 1;
     this.status = 0;
+    this.asteriskCount = 0;
     this.chalkParser = new ChalkParser();
     this.integerParser = new IntegerParser();
     const {
@@ -181,9 +161,41 @@ class Fulmination {
     console.log(error.stack);
   }
 
+  replaceAllAsterisk(str) {
+    if (typeof str !== 'string') {
+      throw new Error('[Error] The parameter str should be a string type.');
+    }
+    const chars = [];
+    let index;
+    outer: for (let i = str.length - 1; i >= 0; i -= 1) {
+      const char = str.charAt(i);
+      switch (char) {
+        case '*': {
+          this.asteriskCount -= 1;
+          const { asteriskCount, } = this;
+          if (asteriskCount < 0) {
+            if (i - 1 < 0) {
+              index = 0;
+            } else {
+              index = i;
+            }
+            break outer;
+          }
+          chars.push(' ');
+          break;
+        }
+        default:
+          index = i;
+          break outer;
+      }
+    }
+    return str.substring(0, index + 1) + chars.join('');
+  }
+
   cleanAsteriskAndOther() {
     delete this.asterisk;
     delete this.other;
+    this.asteriskCount = 0;
   }
 
   handleSpace() {
@@ -302,7 +314,7 @@ class Fulmination {
     if (asterisk === true && other !== true) {
       this.showText(this.chars.join(''), linebreak);
     } else {
-      this.showText(replaceAllAsterisk(this.chars.join('').trimEnd()), linebreak);
+      this.showText(this.replaceAllAsterisk(this.chars.join('').trimEnd()), linebreak);
     }
     this.status = status;
     this.cleanAsteriskAndOther();
@@ -312,11 +324,11 @@ class Fulmination {
     if (!Number.isInteger(status)) {
       throw new Error('[Error] The parameter status should be an integer type.');
     }
-    const { passages, chars, asterisk, other, } = this;
+    const { asterisk, other, chars, passages, } = this;
     if (asterisk === true && other !== true) {
       passages.push(chars.join(''));
     } else {
-      passages.push(replaceAllAsterisk(chars.join('').trimEnd()));
+      passages.push(this.replaceAllAsterisk(chars.join('').trimEnd()));
     }
     passages.shift();
     this.showPassages();
@@ -335,7 +347,8 @@ class Fulmination {
       throw new Error('[Error] The parameter status should be an integer type.');
     }
     this.keep = true;
-    this.dealOther(char);
+    this.other = true;
+    this.chars.push(char);
     this.status = status;
   }
 
@@ -356,6 +369,7 @@ class Fulmination {
     const { other, } = this;
     if (other === true) {
       this.chars.push('*');
+      this.asteriskCount += 1;
     } else {
       this.chars.push(' ');
     }
@@ -674,7 +688,7 @@ class Fulmination {
         if (asterisk === true && other !== true) {
           passages.push(chars.join(''));
         } else {
-          passages.push(replaceAllAsterisk(chars.join('').trimEnd()));
+          passages.push(this.replaceAllAsterisk(chars.join('').trimEnd()));
         }
         this.chars = [];
         this.cleanAsteriskAndOther();
@@ -913,7 +927,7 @@ class Fulmination {
           case '': {
             const { sustain, } = this;
             if (sustain !== true) {
-              this.showText(replaceAllAsterisk(this.chars.join('')));
+              this.showText(this.replaceAllAsterisk(this.chars.join('')));
               this.status = 0;
               this.cleanAsteriskAndOther();
               delete this.chars;
@@ -1017,7 +1031,7 @@ class Fulmination {
             if (asterisk === true && other !== true) {
               passages.push(chars.join(''));
             } else {
-              passages.push(chars.join('').trimEnd().replaceAll('*', ' '));
+              passages.push(this.replaceAllAsterisk(chars.join('').trimEnd()));
             }
             this.chars = [];
             this.cleanAsteriskAndOther();
@@ -1093,7 +1107,7 @@ class Fulmination {
               }
             }
             const integer = integerParser.getInteger();
-            this.showText(this.chars.join('').trimEnd().replaceAll('*', ' '));
+            this.showText(this.replaceAllAsterisk(this.chars.join('').trimEnd()));
             const {
               options: {
                 debug,

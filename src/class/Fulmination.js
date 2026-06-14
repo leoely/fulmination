@@ -1202,6 +1202,9 @@ class Fulmination {
         break;
       case 22:
         switch (char) {
+          case '':
+            this.showContentAndJump(0);
+            break;
           case '\n':
             this.chars.push(char);
             this.showContentAndJump(21);

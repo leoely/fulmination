@@ -23,6 +23,5 @@ fulmination.scan(`
   *** at /home/gbusey/file.js:525:2
   *** at Frobnicator.refrobulate (/home/gbusey/business-logic.js:424:21)
   *** at Actor.<anonymous> (/home/gbusey/actors.js:400:8)
-  *** at increaseSynergy (/home/gbusey/actors.js:701:6)
-`);
+  *** at increaseSynergy (/home/gbusey/actors.js:701:6)`);
 fulmination.scan('(+) bold: some');
